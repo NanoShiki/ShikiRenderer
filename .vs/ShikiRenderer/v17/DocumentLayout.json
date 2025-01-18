@@ -1,0 +1,93 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\A_myLearning\\ShikiRenderer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\auto.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|solutionrelative:ShikiRenderer\\auto.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|solutionrelative:ShikiRenderer\\Gui.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|solutionrelative:ShikiRenderer\\Gui.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D0126871-FA13-4D35-954F-F10AC7619B4E}|ShikiRenderer\\ShikiRenderer.vcxproj|solutionrelative:ShikiRenderer\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1a46fd64-28d5-0019-8eb3-17a02d419b53}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Gui.h",
+              "DocumentMoniker": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.h",
+              "RelativeDocumentMoniker": "ShikiRenderer\\Gui.h",
+              "ToolTip": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.h",
+              "RelativeToolTip": "ShikiRenderer\\Gui.h",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAA4AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-18T06:04:34.155Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Gui.cpp",
+              "DocumentMoniker": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.cpp",
+              "RelativeDocumentMoniker": "ShikiRenderer\\Gui.cpp",
+              "ToolTip": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\Gui.cpp",
+              "RelativeToolTip": "ShikiRenderer\\Gui.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-01-18T05:34:35.241Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "auto.h",
+              "DocumentMoniker": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\auto.h",
+              "RelativeDocumentMoniker": "ShikiRenderer\\auto.h",
+              "ToolTip": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\auto.h",
+              "RelativeToolTip": "ShikiRenderer\\auto.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-18T02:10:52.755Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "main.cpp",
+              "DocumentMoniker": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\main.cpp",
+              "RelativeDocumentMoniker": "ShikiRenderer\\main.cpp",
+              "ToolTip": "D:\\A_myLearning\\ShikiRenderer\\ShikiRenderer\\main.cpp",
+              "RelativeToolTip": "ShikiRenderer\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-01-18T02:10:38.381Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
