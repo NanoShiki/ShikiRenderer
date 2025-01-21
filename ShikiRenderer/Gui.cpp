@@ -27,7 +27,6 @@ void Gui::newFrame() {
 
 void Gui::endFrame() {
 	if (!initialized) return;
-
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -12,7 +12,14 @@
 
 class DefaultOperation {
 public:
-	static void drawBox(Object& box);
+	static bool				textureReady;
+
+	static void drawBox(Object& box, Shader shader);
+	static void loadTexture();
+
+private:
+	static unsigned int		defaultVAO, defaultVBO;
+	static unsigned int		defaultTex0, defaultTex1;
 };
 
 

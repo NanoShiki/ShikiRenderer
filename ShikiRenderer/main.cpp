@@ -44,6 +44,7 @@ int main() {
 	Gui gui;
 	gui.initialize(window);
 	Object box;
+	Shader defaultShader("../shader/default.vs", "../shader/default.fs");
 	
 	//‰÷»æ—≠ª∑
 	//-------
@@ -67,12 +68,26 @@ int main() {
 		box.model = model;
 
 		RenderState::updateTransform();
-		DefaultOperation::drawBox(box);
+		if (!DefaultOperation::textureReady) {
+			DefaultOperation::loadTexture();
+			DefaultOperation::textureReady = true;
+		}
+		DefaultOperation::drawBox(box, defaultShader);
 
 		//GUI
 		gui.newFrame();
 		{
 			ImGui::Begin("____MENU____");
+
+			ImGui::Text("PRESS C TO ENTER CAMERA MODE");
+			if (!RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				RenderState::inCameraMode = true;
+			}
+			else if (RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				RenderState::inCameraMode = false;
+			}
 
 			ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
 
@@ -84,19 +99,10 @@ int main() {
 				ImGui::EndMenu();
 			}
 
-			ImGui::Text("Rotation:");
+			ImGui::Text("Rotation: ");
 			ImGui::SliderAngle("Pitch(x-axis)", &box.rotation[0], -180.0f, 180.0f);
 			ImGui::SliderAngle("Yaw(y-axis)",	&box.rotation[1], -180.0f, 180.0f);
 			ImGui::SliderAngle("Roll(z-axis)",	&box.rotation[2], -180.0f, 180.0f);
-
-			if (!RenderState::inCameraMode && (ImGui::Button("Camera Mode") || ImGui::IsKeyPressed(ImGuiKey_C))) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				RenderState::inCameraMode = true;
-			}
-			else if (RenderState::inCameraMode && (ImGui::Button("Camera Mode") || ImGui::IsKeyPressed(ImGuiKey_C))) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				RenderState::inCameraMode = false;
-			}
 
 			ImGui::End();
 		}
