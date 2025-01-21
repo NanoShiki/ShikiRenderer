@@ -8,7 +8,7 @@ void Gui::initialize(GLFWwindow* window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.Fonts->AddFontFromFileTTF("../resources/font/consola.ttf", 18.0f);
+	io.Fonts->AddFontFromFileTTF("../resources/font/consolab.ttf", 16.0f);
 	ImGui::GetIO().FontDefault = io.Fonts->Fonts.back();
 
 	ImGui::StyleColorsDark();

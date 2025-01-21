@@ -1,3 +1,5 @@
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Camera.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Camera.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\DefaultOperation.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\DefaultOperation.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\glad.c;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\glad.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\Gui.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Gui.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\imgui.obj
@@ -8,4 +10,7 @@ D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_impl_opengl3.cpp;D:\A_my
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_tables.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\imgui_tables.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_widgets.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\imgui_widgets.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\main.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\main.obj
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\shader.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\shader.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Object.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Object.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\RenderState.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\RenderState.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Shader.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Shader.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\stb_image.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\stb_image.obj

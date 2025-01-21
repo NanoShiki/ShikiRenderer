@@ -1,9 +1,6 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "ImGui/imconfig.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -27,4 +24,4 @@ private:
 
 };
 
-#endif //GUI_H
+#endif//GUI_H

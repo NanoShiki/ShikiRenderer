@@ -1,11 +1,12 @@
 #ifndef AUTO_H
 #define AUTO_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-
+#include "stb_image.h"
+#include "Shader.h"
 #include "Gui.h"
+#include "RenderState.h"
+#include "DefaultOperation.h"
+#include "Camera.h"
+#include "Object.h"
 
-#endif	//AUTO_H
+#endif//AUTO_H
