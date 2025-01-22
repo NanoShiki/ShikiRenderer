@@ -20,7 +20,7 @@ public:
 private:
 	static unsigned int		defaultVAO, defaultVBO;
 	static unsigned int		defaultTex0, defaultTex1;
+	static glm::mat4		getNormalMatrix(glm::mat4& model);
 };
-
 
 #endif//DEFAULTOPERATION_H

@@ -98,14 +98,17 @@ int main() {
 				if (ImGui::MenuItem("Orthographic"))	RenderState::perspective = false;
 				ImGui::EndMenu();
 			}
-			ImGui::SliderAngle("Orthographic Width", &RenderState::orthoWidth, 0.0f, (float)RenderState::SCREEN_WIDTH);
-			ImGui::SliderAngle("Orthographic Height", &RenderState::orthoHeight, 0.0f, (float)RenderState::SCREEN_HEIGHT);
-
+			ImGui::PushItemWidth(200.0f);
+			ImGui::SliderFloat("Orthographic Scope", &RenderState::orthoHeight, 0.0f, 10.0f);
 			ImGui::Text("Rotation: ");
 			ImGui::SliderAngle("Pitch(x-axis)", &box.rotation[0], -180.0f, 180.0f);
 			ImGui::SliderAngle("Yaw(y-axis)",	&box.rotation[1], -180.0f, 180.0f);
 			ImGui::SliderAngle("Roll(z-axis)",	&box.rotation[2], -180.0f, 180.0f);
-
+			ImGui::PopItemWidth();
+			ImGui::Text("Point Light: ");
+			ImGui::SliderFloat3("Position", &RenderState::pointLightPos[0], -3.0f, 3.0f);
+			ImGui::SliderFloat3("Color", &RenderState::pointLightCol[0], 0.0f, 1.0f);
+			
 			ImGui::End();
 		}
 		gui.endFrame();
