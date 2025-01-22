@@ -16,8 +16,8 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{0e00e490-223e-40f2-b055-a1740319d5e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Render">
-      <UniqueIdentifier>{473a7084-2481-4a38-a40b-ec5ee23ee803}</UniqueIdentifier>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{1ec89eca-d8aa-4334-a3d7-2bb2745a255b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -122,5 +122,13 @@
     <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\default.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\default.vs">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

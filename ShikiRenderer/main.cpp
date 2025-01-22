@@ -98,6 +98,8 @@ int main() {
 				if (ImGui::MenuItem("Orthographic"))	RenderState::perspective = false;
 				ImGui::EndMenu();
 			}
+			ImGui::SliderAngle("Orthographic Width", &RenderState::orthoWidth, 0.0f, (float)RenderState::SCREEN_WIDTH);
+			ImGui::SliderAngle("Orthographic Height", &RenderState::orthoHeight, 0.0f, (float)RenderState::SCREEN_HEIGHT);
 
 			ImGui::Text("Rotation: ");
 			ImGui::SliderAngle("Pitch(x-axis)", &box.rotation[0], -180.0f, 180.0f);

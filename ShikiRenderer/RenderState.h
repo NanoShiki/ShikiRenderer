@@ -23,6 +23,8 @@ public:
 	static glm::mat4	projection;				//设定投影变换矩阵
 	static glm::mat4	view;					//设定观察变换矩阵
 	static Camera		camera;					//设定当前主摄像机
+	static float		orthoWidth;				//设定正交矩阵宽度
+	static float		orthoHeight;			//设定正交矩阵高度
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)

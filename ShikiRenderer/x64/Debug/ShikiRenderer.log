@@ -2,6 +2,7 @@
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\Shader.h(22,128): warning C4244: 'argument': conversion from 'const float' to 'GLint', possible loss of data
   (compiling source file 'DefaultOperation.cpp')
   
+  RenderState.cpp
   main.cpp
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\Shader.h(22,128): warning C4244: 'argument': conversion from 'const float' to 'GLint', possible loss of data
   (compiling source file 'main.cpp')
