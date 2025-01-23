@@ -1,30 +1,42 @@
 #version 330 core
 out vec4 fragColor;
 
-in vec2 texCoord;
-in vec3 normal;
-in vec3 worldPos;
+in vec2			texCoord;
+in vec3			normal;
+in vec3			worldPos;
 
-uniform sampler2D	texture0;
-uniform sampler2D	texture1;
-uniform vec3		lightPos;
-uniform vec3		lightCol;
-uniform vec3		viewPos;
-uniform mat3		normalMatrix;
+struct Light{
+	vec3		position;
+
+	vec3		lightCol;
+	float		ambientStrength;
+	float		pecularStrength;
+	float		diffuseStrength;
+};
+uniform			Light light;
+
+struct Material{
+	sampler2D	diffuseMap;
+	sampler2D	specularMap;
+	float		specularPow;
+};
+uniform			Material material;
+
+uniform vec3	viewPos;
+uniform mat3	normalMatrix;
 
 void main(){
-	fragColor				= mix(texture(texture0, texCoord), texture(texture1, texCoord), 0.2);
-	vec3 lightDir			= normalize(lightPos - worldPos);
+	vec3 lightDir			= normalize(light.position - worldPos);
 	vec3 viewDir			= normalize(viewPos - worldPos);
 	vec3 worldNormal		= normalize(normalMatrix * normal);
-	float ambientStrength	= 0.2;
-	float specularPow		= 32.0;
-	float specularStrength	= 0.5;
 	vec3 halfwayVector		= normalize(lightDir + viewDir);
+	float diff				= max(dot(worldNormal, lightDir), 0.0);
+	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
 
-	vec3 ambientLight		= lightCol * ambientStrength;
-	vec3 diffuseLight		= max(dot(lightDir, worldNormal), 0.0) * lightCol;
-	vec3 specularLight		= specularStrength * lightCol * pow(max(dot(halfwayVector, worldNormal), 0.0), specularPow);
+	vec3 ambient			= light.ambientStrength * texture(material.diffuseMap, texCoord).rgb;
+	vec3 diffuse			= light.diffuseStrength * diff * texture(material.diffuseMap, texCoord).rgb;
+	vec3 specular			= light.specularStrength * spec * texture(material.specularMap, texCoord).rgb;
 
-	fragColor				= vec4((ambientLight + diffuseLight + specularLight) * vec3(fragColor), 1.0);
+	vec3 result				= ambient + diffuse + specular;
+	fragColor				= vec4(result, 1.0);
 }

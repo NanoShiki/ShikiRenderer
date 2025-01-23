@@ -4,40 +4,50 @@ unsigned int	DefaultOperation::defaultVAO = 0;
 unsigned int	DefaultOperation::defaultVBO = 0;
 unsigned int	DefaultOperation::defaultTex0 = 0;
 unsigned int	DefaultOperation::defaultTex1 = 0;
-bool			DefaultOperation::textureReady = false;
 
 void DefaultOperation::loadTexture() {
 	if (DefaultOperation::defaultTex0 != 0) return;
-	glGenTextures(1, &DefaultOperation::defaultTex0);
-	glBindTexture(GL_TEXTURE_2D, DefaultOperation::defaultTex0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("../resources/texture/container.jpg", &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else std::cout << "Failed to load texture" << std::endl;
-	stbi_image_free(data);
-
-	glGenTextures(1, &DefaultOperation::defaultTex1);
-	glBindTexture(GL_TEXTURE_2D, DefaultOperation::defaultTex1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	data = stbi_load("../resources/texture/awesomeface.png", &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else std::cout << "Failed to load texture" << std::endl;
-	stbi_image_free(data);
+	DefaultOperation::defaultTex0 = DefaultOperation::loadTexture("../resources/texture/container2.png");
+	DefaultOperation::defaultTex1 = DefaultOperation::loadTexture("../resources/texture/container2_specular.png");
 }
+
+unsigned int DefaultOperation::loadTexture(const char* path)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
+}
+
 void DefaultOperation::drawBox(Object& box, Shader shader) {
 	if (DefaultOperation::defaultVAO == 0) {
 		float boxVertices[] = {
@@ -98,8 +108,8 @@ void DefaultOperation::drawBox(Object& box, Shader shader) {
 	}
 
 	shader.use();
-	shader.setInt("texture0", 0);
-	shader.setInt("texture1", 1);
+	shader.setInt("material.diffuseMap", 0);
+	shader.setInt("material.specularMap", 1);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, DefaultOperation::defaultTex0);
@@ -114,10 +124,13 @@ void DefaultOperation::drawBox(Object& box, Shader shader) {
 	shader.setMat4("projection", RenderState::projection);
 
 	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(box.model));
-	shader.setVec3("lightPos", RenderState::pointLightPos);
-	shader.setVec3("lightCol", RenderState::pointLightCol);
+	shader.setVec3("light.position", RenderState::pointLightPos);
+	shader.setFloat("light.ambientStrength", 0.2f);
+	shader.setFloat("light.specularStrength", 1.0f);
+	shader.setFloat("light.diffuseStrength", 1.0f);
+	shader.setVec3("light.lightCol", RenderState::pointLightCol);
+	shader.setFloat("material.specularPow", 64.0f);
 	shader.setVec3("viewPos", RenderState::camera.Position);
-
 
 	glBindVertexArray(DefaultOperation::defaultVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -12,10 +12,9 @@
 
 class DefaultOperation {
 public:
-	static bool				textureReady;
-
 	static void drawBox(Object& box, Shader shader);
 	static void loadTexture();
+	static unsigned int loadTexture(const char* path);
 
 private:
 	static unsigned int		defaultVAO, defaultVBO;

@@ -68,10 +68,7 @@ int main() {
 		box.model = model;
 
 		RenderState::updateTransform();
-		if (!DefaultOperation::textureReady) {
-			DefaultOperation::loadTexture();
-			DefaultOperation::textureReady = true;
-		}
+		DefaultOperation::loadTexture();
 		DefaultOperation::drawBox(box, defaultShader);
 
 		//GUI
