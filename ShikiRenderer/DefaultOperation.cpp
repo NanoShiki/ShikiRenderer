@@ -48,7 +48,7 @@ unsigned int DefaultOperation::loadTexture(const char* path)
 	return textureID;
 }
 
-void DefaultOperation::drawBox(Object& box, Shader shader) {
+void DefaultOperation::drawBox(Object& box, Shader shader, RenderState::ShaderType shaderType) {
 	if (DefaultOperation::defaultVAO == 0) {
 		float boxVertices[] = {
 		//vertex			//texture		//normal
@@ -123,12 +123,32 @@ void DefaultOperation::drawBox(Object& box, Shader shader) {
 	shader.setMat4("view", RenderState::view);
 	shader.setMat4("projection", RenderState::projection);
 
+	if (shaderType == RenderState::DirectionalLight) {
+		shader.setVec3("dirLight.direction", RenderState::dirLightDir);
+		shader.setFloat("dirLight.ambientStrength", RenderState::dirAmbientStrength);
+		shader.setFloat("dirLight.specularStrength", RenderState::dirSpecularStrength);
+		shader.setFloat("dirLight.diffuseStrength", RenderState::dirDiffuseStrength);
+		shader.setVec3("dirLight.lightCol", RenderState::dirLightCol);
+	}
+	if (shaderType == RenderState::PointLight) {
+		shader.setVec3("pointLight.position", RenderState::poiLightPos);
+		shader.setFloat("pointLight.ambientStrength", RenderState::poiAmbientStrength);
+		shader.setFloat("pointLight.specularStrength", RenderState::poiSpecularStrength);
+		shader.setFloat("pointLight.diffuseStrength", RenderState::poiDiffuseStrength);
+		shader.setVec3("pointLight.lightCol", RenderState::poiLightCol);
+	}
+	if (shaderType == RenderState::SpotLight) {
+		shader.setVec3("spotLight.position", RenderState::camera.Position);
+		shader.setVec3("spotLight.direction", RenderState::camera.Front);
+		shader.setFloat("spotLight.ambientStrength", RenderState::spoAmbientStrength);
+		shader.setFloat("spotLight.specularStrength", RenderState::spoSpecularStrength);
+		shader.setFloat("spotLight.diffuseStrength", RenderState::spoDiffuseStrength);
+		shader.setVec3("spotLight.lightCol", RenderState::spoLightCol);
+		shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(RenderState::spoCutOff)));
+		shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(RenderState::spoCutOff + 5.0f)));
+	}
+
 	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(box.model));
-	shader.setVec3("light.position", RenderState::pointLightPos);
-	shader.setFloat("light.ambientStrength", 0.2f);
-	shader.setFloat("light.specularStrength", 1.0f);
-	shader.setFloat("light.diffuseStrength", 1.0f);
-	shader.setVec3("light.lightCol", RenderState::pointLightCol);
 	shader.setFloat("material.specularPow", 64.0f);
 	shader.setVec3("viewPos", RenderState::camera.Position);
 

@@ -44,7 +44,9 @@ int main() {
 	Gui gui;
 	gui.initialize(window);
 	Object box;
-	Shader defaultShader("../shader/default.vs", "../shader/default.fs");
+	Shader DirShader("../shader/default.vs", "../shader/directionalLight.fs");
+	Shader PoiShader("../shader/default.vs", "../shader/pointLight.fs");
+	Shader SpoShader("../shader/default.vs", "../shader/spotLight.fs");
 	
 	//‰÷»æ—≠ª∑
 	//-------
@@ -69,7 +71,9 @@ int main() {
 
 		RenderState::updateTransform();
 		DefaultOperation::loadTexture();
-		DefaultOperation::drawBox(box, defaultShader);
+		if (RenderState::onlyDirLight) DefaultOperation::drawBox(box, DirShader, RenderState::DirectionalLight);
+		if (RenderState::onlyPoiLight) DefaultOperation::drawBox(box, PoiShader, RenderState::PointLight);
+		if (RenderState::onlySpoLight) DefaultOperation::drawBox(box, SpoShader, RenderState::SpotLight);
 
 		//GUI
 		gui.newFrame();
@@ -102,14 +106,66 @@ int main() {
 			ImGui::SliderAngle("Yaw(y-axis)",	&box.rotation[1], -180.0f, 180.0f);
 			ImGui::SliderAngle("Roll(z-axis)",	&box.rotation[2], -180.0f, 180.0f);
 			ImGui::PopItemWidth();
-			ImGui::Text("Point Light: ");
-			ImGui::SliderFloat3("Position", &RenderState::pointLightPos[0], -3.0f, 3.0f);
-			ImGui::SliderFloat3("Color", &RenderState::pointLightCol[0], 0.0f, 1.0f);
-			
+
+			if (ImGui::BeginMenu("Directional Light")) {
+				if (ImGui::MenuItem("Only Directional Light")) {
+					RenderState::onlyDirLight = true;
+					RenderState::onlyPoiLight = false;
+					RenderState::onlySpoLight = false;
+				}
+				ImGui::Text("Configure:");
+				ImGui::SliderFloat3("Direction", &RenderState::dirLightDir[0], -3.0f, 3.0f);
+				ImGui::SliderFloat3("Color", &RenderState::dirLightCol[0], 0.0f, 1.0f);
+				ImGui::SliderFloat("Ambient Strength", &RenderState::dirAmbientStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Specular Strength", &RenderState::dirSpecularStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Diffuse Strength", &RenderState::dirDiffuseStrength, 0.0f, 1.0f);
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Point Light")) {
+				if (ImGui::MenuItem("Only Directional Light")) {
+					RenderState::onlyPoiLight = true;
+					RenderState::onlyDirLight = false;
+					RenderState::onlySpoLight = false;
+				}
+				ImGui::Text("Configure:");
+				ImGui::SliderFloat3("Position", &RenderState::poiLightPos[0], -3.0f, 3.0f);
+				ImGui::SliderFloat3("Color", &RenderState::poiLightCol[0], 0.0f, 1.0f);
+				ImGui::SliderFloat("Ambient Strength", &RenderState::poiAmbientStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Specular Strength", &RenderState::poiSpecularStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Diffuse Strength", &RenderState::poiDiffuseStrength, 0.0f, 1.0f);
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Spot Light")) {
+				if (ImGui::MenuItem("Only Spot Light")) {
+					RenderState::onlySpoLight = true;
+					RenderState::onlyPoiLight = false;
+					RenderState::onlyDirLight = false;
+				}
+				ImGui::Text("Configure:");
+				ImGui::SliderFloat3("Color", &RenderState::spoLightCol[0], 0.0f, 1.0f);
+				ImGui::SliderFloat("Ambient Strength", &RenderState::spoAmbientStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Specular Strength", &RenderState::spoSpecularStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Diffuse Strength", &RenderState::spoDiffuseStrength, 0.0f, 1.0f);
+				ImGui::SliderFloat("Cut Off", &RenderState::spoCutOff, 5.0f, 60.0f);
+				ImGui::EndMenu();
+			}
 			ImGui::End();
 		}
 		gui.endFrame();
 		
+		if (RenderState::onlyDirLight) {
+			RenderState::onlyPoiLight = false;
+			RenderState::onlySpoLight = false;
+		}
+		if (RenderState::onlyPoiLight) {
+			RenderState::onlyDirLight = false;
+			RenderState::onlySpoLight = false;
+		}
+		if (RenderState::onlySpoLight) {
+			RenderState::onlyPoiLight = false;
+			RenderState::onlyDirLight = false;
+		}
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

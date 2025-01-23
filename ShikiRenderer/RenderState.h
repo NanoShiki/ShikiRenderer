@@ -10,6 +10,11 @@
 
 class RenderState {
 public:
+	static enum ShaderType {
+		DirectionalLight,
+		PointLight,
+		SpotLight,
+	};
 	static bool			enableDepthTest;		//是否开启深度测试
 	static bool			perspective;			//是否开启透视投影
 	static glm::vec4	clearColor;				//指定清理屏幕颜色
@@ -24,8 +29,27 @@ public:
 	static glm::mat4	view;					//设定观察变换矩阵
 	static Camera		camera;					//设定当前主摄像机
 	static float		orthoHeight;			//设定正交矩阵高度
-	static glm::vec3	pointLightPos;			//设定点光源的位置
-	static glm::vec3	pointLightCol;			//设定点光源的颜色
+
+	static glm::vec3	dirLightDir;			//设定方向光的朝向
+	static glm::vec3	dirLightCol;			//设定方向光的颜色
+	static float		dirAmbientStrength;		//设定方向环境强度
+	static float		dirSpecularStrength;	//设定方向高光强度
+	static float		dirDiffuseStrength;		//设定方向漫反射度
+	static bool			onlyDirLight;			//是否开启方向光源
+
+	static glm::vec3	poiLightPos;
+	static glm::vec3	poiLightCol;
+	static float		poiAmbientStrength;
+	static float		poiSpecularStrength;
+	static float		poiDiffuseStrength;
+	static bool			onlyPoiLight;
+
+	static glm::vec3	spoLightCol;
+	static float		spoAmbientStrength;
+	static float		spoSpecularStrength;
+	static float		spoDiffuseStrength;
+	static float		spoCutOff;
+	static bool			onlySpoLight;
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)
