@@ -127,13 +127,7 @@
     <None Include="..\shader\default.vs">
       <Filter>Shader</Filter>
     </None>
-    <None Include="..\shader\spotLight.fs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\pointLight.fs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\directionalLight.fs">
+    <None Include="..\shader\default.fs">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

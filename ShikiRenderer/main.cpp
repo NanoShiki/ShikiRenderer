@@ -44,9 +44,7 @@ int main() {
 	Gui gui;
 	gui.initialize(window);
 	Object box;
-	Shader DirShader("../shader/default.vs", "../shader/directionalLight.fs");
-	Shader PoiShader("../shader/default.vs", "../shader/pointLight.fs");
-	Shader SpoShader("../shader/default.vs", "../shader/spotLight.fs");
+	Shader defaultShader("../shader/default.vs", "../shader/default.fs");
 	
 	//‰÷»æ—≠ª∑
 	//-------
@@ -71,9 +69,7 @@ int main() {
 
 		RenderState::updateTransform();
 		DefaultOperation::loadTexture();
-		if (RenderState::onlyDirLight) DefaultOperation::drawBox(box, DirShader, RenderState::DirectionalLight);
-		if (RenderState::onlyPoiLight) DefaultOperation::drawBox(box, PoiShader, RenderState::PointLight);
-		if (RenderState::onlySpoLight) DefaultOperation::drawBox(box, SpoShader, RenderState::SpotLight);
+		DefaultOperation::drawBox(box, defaultShader);
 
 		//GUI
 		gui.newFrame();
@@ -108,11 +104,7 @@ int main() {
 			ImGui::PopItemWidth();
 
 			if (ImGui::BeginMenu("Directional Light")) {
-				if (ImGui::MenuItem("Only Directional Light")) {
-					RenderState::onlyDirLight = true;
-					RenderState::onlyPoiLight = false;
-					RenderState::onlySpoLight = false;
-				}
+				ImGui::Checkbox("Open Directional Light", &RenderState::openDirLight);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Direction", &RenderState::dirLightDir[0], -3.0f, 3.0f);
 				ImGui::SliderFloat3("Color", &RenderState::dirLightCol[0], 0.0f, 1.0f);
@@ -122,11 +114,7 @@ int main() {
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Point Light")) {
-				if (ImGui::MenuItem("Only Directional Light")) {
-					RenderState::onlyPoiLight = true;
-					RenderState::onlyDirLight = false;
-					RenderState::onlySpoLight = false;
-				}
+				ImGui::Checkbox("Open Point Light", &RenderState::openPoiLight);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Position", &RenderState::poiLightPos[0], -3.0f, 3.0f);
 				ImGui::SliderFloat3("Color", &RenderState::poiLightCol[0], 0.0f, 1.0f);
@@ -136,11 +124,7 @@ int main() {
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Spot Light")) {
-				if (ImGui::MenuItem("Only Spot Light")) {
-					RenderState::onlySpoLight = true;
-					RenderState::onlyPoiLight = false;
-					RenderState::onlyDirLight = false;
-				}
+				ImGui::Checkbox("Open Spot Light", &RenderState::openSpoLight);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Color", &RenderState::spoLightCol[0], 0.0f, 1.0f);
 				ImGui::SliderFloat("Ambient Strength", &RenderState::spoAmbientStrength, 0.0f, 1.0f);
@@ -152,19 +136,6 @@ int main() {
 			ImGui::End();
 		}
 		gui.endFrame();
-		
-		if (RenderState::onlyDirLight) {
-			RenderState::onlyPoiLight = false;
-			RenderState::onlySpoLight = false;
-		}
-		if (RenderState::onlyPoiLight) {
-			RenderState::onlyDirLight = false;
-			RenderState::onlySpoLight = false;
-		}
-		if (RenderState::onlySpoLight) {
-			RenderState::onlyPoiLight = false;
-			RenderState::onlyDirLight = false;
-		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

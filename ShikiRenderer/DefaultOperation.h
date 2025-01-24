@@ -12,7 +12,7 @@
 
 class DefaultOperation {
 public:
-	static void drawBox(Object& box, Shader shader, RenderState::ShaderType shaderType);
+	static void drawBox(Object& box, Shader shader);
 	static void loadTexture();
 	static unsigned int loadTexture(const char* path);
 

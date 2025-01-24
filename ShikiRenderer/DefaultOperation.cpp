@@ -48,7 +48,7 @@ unsigned int DefaultOperation::loadTexture(const char* path)
 	return textureID;
 }
 
-void DefaultOperation::drawBox(Object& box, Shader shader, RenderState::ShaderType shaderType) {
+void DefaultOperation::drawBox(Object& box, Shader shader) {
 	if (DefaultOperation::defaultVAO == 0) {
 		float boxVertices[] = {
 		//vertex			//texture		//normal
@@ -123,21 +123,25 @@ void DefaultOperation::drawBox(Object& box, Shader shader, RenderState::ShaderTy
 	shader.setMat4("view", RenderState::view);
 	shader.setMat4("projection", RenderState::projection);
 
-	if (shaderType == RenderState::DirectionalLight) {
+	shader.setBool("dirLight.open", RenderState::openDirLight);
+	shader.setBool("pointLight.open", RenderState::openPoiLight);
+	shader.setBool("spotLight.open", RenderState::openSpoLight);
+
+	if (RenderState::openDirLight) {
 		shader.setVec3("dirLight.direction", RenderState::dirLightDir);
 		shader.setFloat("dirLight.ambientStrength", RenderState::dirAmbientStrength);
 		shader.setFloat("dirLight.specularStrength", RenderState::dirSpecularStrength);
 		shader.setFloat("dirLight.diffuseStrength", RenderState::dirDiffuseStrength);
 		shader.setVec3("dirLight.lightCol", RenderState::dirLightCol);
 	}
-	if (shaderType == RenderState::PointLight) {
+	if (RenderState::openPoiLight) {
 		shader.setVec3("pointLight.position", RenderState::poiLightPos);
 		shader.setFloat("pointLight.ambientStrength", RenderState::poiAmbientStrength);
 		shader.setFloat("pointLight.specularStrength", RenderState::poiSpecularStrength);
 		shader.setFloat("pointLight.diffuseStrength", RenderState::poiDiffuseStrength);
 		shader.setVec3("pointLight.lightCol", RenderState::poiLightCol);
 	}
-	if (shaderType == RenderState::SpotLight) {
+	if (RenderState::openSpoLight) {
 		shader.setVec3("spotLight.position", RenderState::camera.Position);
 		shader.setVec3("spotLight.direction", RenderState::camera.Front);
 		shader.setFloat("spotLight.ambientStrength", RenderState::spoAmbientStrength);

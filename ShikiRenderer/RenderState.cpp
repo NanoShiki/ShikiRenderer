@@ -21,21 +21,21 @@ glm::vec3	RenderState::dirLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
 float		RenderState::dirAmbientStrength		= 0.2f;
 float		RenderState::dirSpecularStrength	= 1.0f;
 float		RenderState::dirDiffuseStrength		= 0.5f;
-bool		RenderState::onlyDirLight			= true;
+bool		RenderState::openDirLight			= true;
 
 glm::vec3	RenderState::poiLightPos			= glm::vec3(-1.0f, -1.0f, 2.0f);
 glm::vec3	RenderState::poiLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
 float		RenderState::poiAmbientStrength		= 0.2f;
 float		RenderState::poiSpecularStrength	= 1.0f;
 float		RenderState::poiDiffuseStrength		= 0.5f;
-bool		RenderState::onlyPoiLight			= false;
+bool		RenderState::openPoiLight			= true;
 
 glm::vec3	RenderState::spoLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
-float		RenderState::spoAmbientStrength		= 0.2f;
+float		RenderState::spoAmbientStrength		= 1.0;
 float		RenderState::spoSpecularStrength	= 1.0f;
-float		RenderState::spoDiffuseStrength		= 0.5f;
-float		RenderState::spoCutOff				= 12.5f;
-bool		RenderState::onlySpoLight			= false;
+float		RenderState::spoDiffuseStrength		= 1.0;
+float		RenderState::spoCutOff				= 8.5f;
+bool		RenderState::openSpoLight			= false;
 
 
 void RenderState::updateFrame() {
