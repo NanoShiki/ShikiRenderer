@@ -1,6 +1,7 @@
 #ifndef GUI_H
 #define GUI_H
 
+#include "RenderState.h"
 #include "ImGui/imconfig.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -13,15 +14,13 @@
 
 class Gui {
 public:
-	Gui() : initialized(false) {}
-	~Gui() { if (initialized) terminate(); }
-	void initialize(GLFWwindow* window);
+	Gui(GLFWwindow* window);
+	~Gui();
 	void newFrame();
 	void endFrame();
 	void terminate();
 private:
-	bool initialized = false;
-
+	bool initialized;
 };
 
 #endif//GUI_H

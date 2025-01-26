@@ -69,6 +69,15 @@
     <ClCompile Include="Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auto.h">
@@ -122,12 +131,27 @@
     <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader\default.vs">
+    <None Include="..\shader\box.vs">
       <Filter>Shader</Filter>
     </None>
-    <None Include="..\shader\default.fs">
+    <None Include="..\shader\box.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\backpack.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\backpack.vs">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

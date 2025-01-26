@@ -8,5 +8,6 @@
 #include "DefaultOperation.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Model.h"
 
 #endif//AUTO_H

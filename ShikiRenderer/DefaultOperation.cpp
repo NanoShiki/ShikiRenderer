@@ -2,15 +2,14 @@
 
 unsigned int	DefaultOperation::defaultVAO = 0;
 unsigned int	DefaultOperation::defaultVBO = 0;
-unsigned int	DefaultOperation::defaultTex0 = 0;
-unsigned int	DefaultOperation::defaultTex1 = 0;
+unsigned int	DefaultOperation::boxDiffuseMap = 0;
+unsigned int	DefaultOperation::boxSpecularMap = 0;
 
-void DefaultOperation::loadTexture() {
-	if (DefaultOperation::defaultTex0 != 0) return;
-	DefaultOperation::defaultTex0 = DefaultOperation::loadTexture("../resources/texture/container2.png");
-	DefaultOperation::defaultTex1 = DefaultOperation::loadTexture("../resources/texture/container2_specular.png");
+void DefaultOperation::loadBoxTexture() {
+	if (DefaultOperation::boxDiffuseMap != 0) return;
+	DefaultOperation::boxDiffuseMap = DefaultOperation::loadTexture("../resources/texture/container2.png");
+	DefaultOperation::boxSpecularMap = DefaultOperation::loadTexture("../resources/texture/container2_specular.png");
 }
-
 unsigned int DefaultOperation::loadTexture(const char* path)
 {
 	unsigned int textureID;
@@ -47,8 +46,19 @@ unsigned int DefaultOperation::loadTexture(const char* path)
 
 	return textureID;
 }
+void DefaultOperation::drawBox(Object& box, Shader& shader) {
+	DefaultOperation::setupShader(shader);
 
-void DefaultOperation::drawBox(Object& box, Shader shader) {
+	glm::mat4 boxModel = glm::mat4(1.0f);
+	boxModel = glm::translate(boxModel, box.position);
+	boxModel = glm::rotate(boxModel, box.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	boxModel = glm::rotate(boxModel, box.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	boxModel = glm::rotate(boxModel, box.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	boxModel = glm::scale(boxModel, box.scale);
+	box.model = boxModel;
+	shader.setMat4("model", box.model);
+	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(box.model));
+
 	if (DefaultOperation::defaultVAO == 0) {
 		float boxVertices[] = {
 		//vertex			//texture		//normal
@@ -106,58 +116,66 @@ void DefaultOperation::drawBox(Object& box, Shader shader) {
 		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 	}
-
-	shader.use();
+	
 	shader.setInt("material.diffuseMap", 0);
 	shader.setInt("material.specularMap", 1);
-
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, DefaultOperation::defaultTex0);
+	glBindTexture(GL_TEXTURE_2D, DefaultOperation::boxDiffuseMap);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, DefaultOperation::defaultTex1);
+	glBindTexture(GL_TEXTURE_2D, DefaultOperation::boxSpecularMap);
 
 	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
-
-	shader.setMat4("model", box.model);
-	shader.setMat4("view", RenderState::view);
-	shader.setMat4("projection", RenderState::projection);
-
-	shader.setBool("dirLight.open", RenderState::openDirLight);
-	shader.setBool("pointLight.open", RenderState::openPoiLight);
-	shader.setBool("spotLight.open", RenderState::openSpoLight);
-
-	if (RenderState::openDirLight) {
-		shader.setVec3("dirLight.direction", RenderState::dirLightDir);
-		shader.setFloat("dirLight.ambientStrength", RenderState::dirAmbientStrength);
-		shader.setFloat("dirLight.specularStrength", RenderState::dirSpecularStrength);
-		shader.setFloat("dirLight.diffuseStrength", RenderState::dirDiffuseStrength);
-		shader.setVec3("dirLight.lightCol", RenderState::dirLightCol);
-	}
-	if (RenderState::openPoiLight) {
-		shader.setVec3("pointLight.position", RenderState::poiLightPos);
-		shader.setFloat("pointLight.ambientStrength", RenderState::poiAmbientStrength);
-		shader.setFloat("pointLight.specularStrength", RenderState::poiSpecularStrength);
-		shader.setFloat("pointLight.diffuseStrength", RenderState::poiDiffuseStrength);
-		shader.setVec3("pointLight.lightCol", RenderState::poiLightCol);
-	}
-	if (RenderState::openSpoLight) {
-		shader.setVec3("spotLight.position", RenderState::camera.Position);
-		shader.setVec3("spotLight.direction", RenderState::camera.Front);
-		shader.setFloat("spotLight.ambientStrength", RenderState::spoAmbientStrength);
-		shader.setFloat("spotLight.specularStrength", RenderState::spoSpecularStrength);
-		shader.setFloat("spotLight.diffuseStrength", RenderState::spoDiffuseStrength);
-		shader.setVec3("spotLight.lightCol", RenderState::spoLightCol);
-		shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(RenderState::spoCutOff)));
-		shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(RenderState::spoCutOff + 5.0f)));
-	}
-
-	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(box.model));
-	shader.setFloat("material.specularPow", 64.0f);
-	shader.setVec3("viewPos", RenderState::camera.Position);
 
 	glBindVertexArray(DefaultOperation::defaultVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 glm::mat4 DefaultOperation::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
+void DefaultOperation::setupShader(Shader& shader) {
+	shader.use();
+	if (true) {
+		shader.setMat4("view", RenderState::view);
+		shader.setMat4("projection", RenderState::projection);
+
+		shader.setBool("dirLight.open", RenderState::openDirLight);
+		shader.setBool("pointLight.open", RenderState::openPoiLight);
+		shader.setBool("spotLight.open", RenderState::openSpoLight);
+
+		if (RenderState::openDirLight) {
+			shader.setVec3("dirLight.direction", RenderState::dirLightDir);
+			shader.setFloat("dirLight.ambientStrength", RenderState::dirAmbientStrength);
+			shader.setFloat("dirLight.specularStrength", RenderState::dirSpecularStrength);
+			shader.setFloat("dirLight.diffuseStrength", RenderState::dirDiffuseStrength);
+			shader.setVec3("dirLight.lightCol", RenderState::dirLightCol);
+		}
+		if (RenderState::openPoiLight) {
+			shader.setVec3("pointLight.position", RenderState::poiLightPos);
+			shader.setFloat("pointLight.ambientStrength", RenderState::poiAmbientStrength);
+			shader.setFloat("pointLight.specularStrength", RenderState::poiSpecularStrength);
+			shader.setFloat("pointLight.diffuseStrength", RenderState::poiDiffuseStrength);
+			shader.setVec3("pointLight.lightCol", RenderState::poiLightCol);
+		}
+		if (RenderState::openSpoLight) {
+			shader.setVec3("spotLight.position", RenderState::camera.Position);
+			shader.setVec3("spotLight.direction", RenderState::camera.Front);
+			shader.setFloat("spotLight.ambientStrength", RenderState::spoAmbientStrength);
+			shader.setFloat("spotLight.specularStrength", RenderState::spoSpecularStrength);
+			shader.setFloat("spotLight.diffuseStrength", RenderState::spoDiffuseStrength);
+			shader.setVec3("spotLight.lightCol", RenderState::spoLightCol);
+			shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(RenderState::spoCutOff)));
+			shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(RenderState::spoCutOff + 5.0f)));
+		}
+
+		shader.setFloat("material.specularPow", 64.0f);
+		shader.setVec3("viewPos", RenderState::camera.Position);
+	}
+}
+void DefaultOperation::drawBackpack(Model& backpack, Shader& shader) {
+	DefaultOperation::setupShader(shader);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-1.0f, -1.0f, 0.0f));
+	shader.setMat4("model", model);
+	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(model));
+	backpack.Draw(shader);
+}

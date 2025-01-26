@@ -10,7 +10,10 @@ D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_impl_opengl3.cpp;D:\A_my
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_tables.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\imgui_tables.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\ImGui\imgui_widgets.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\imgui_widgets.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\main.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\main.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Mesh.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Mesh.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Model.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Model.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\Object.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Object.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\RenderState.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\RenderState.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\Shader.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Shader.obj
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\stb_image.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\stb_image.obj
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Window.cpp;D:\A_myLearning\ShikiRenderer\ShikiRenderer\x64\Debug\Window.obj
