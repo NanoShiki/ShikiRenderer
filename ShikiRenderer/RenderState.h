@@ -10,6 +10,7 @@
 
 class RenderState {
 public:
+	static bool			drawWithLine;
 	static bool			enableDepthTest;		
 	static bool			perspective;			
 	static glm::vec4	clearColor;				
@@ -24,27 +25,6 @@ public:
 	static glm::mat4	view;					
 	static Camera		camera;					
 	static float		orthoHeight;			//设定正交矩阵高度
-
-	static glm::vec3	dirLightDir;			
-	static glm::vec3	dirLightCol;			
-	static float		dirAmbientStrength;		
-	static float		dirSpecularStrength;	
-	static float		dirDiffuseStrength;		
-	static bool			openDirLight;			
-
-	static glm::vec3	poiLightPos;
-	static glm::vec3	poiLightCol;
-	static float		poiAmbientStrength;
-	static float		poiSpecularStrength;
-	static float		poiDiffuseStrength;
-	static bool			openPoiLight;
-
-	static glm::vec3	spoLightCol;
-	static float		spoAmbientStrength;
-	static float		spoSpecularStrength;
-	static float		spoDiffuseStrength;
-	static float		spoCutOff;
-	static bool			openSpoLight;
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)

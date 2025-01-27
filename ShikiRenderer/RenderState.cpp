@@ -1,5 +1,6 @@
 #include "RenderState.h"
 
+bool		RenderState::drawWithLine			= false;
 bool		RenderState::enableDepthTest		= true;
 bool		RenderState::perspective			= true;
 glm::vec4	RenderState::clearColor				= glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
@@ -15,28 +16,6 @@ glm::mat4	RenderState::projection				= glm::mat4(1.0f);
 glm::mat4	RenderState::view					= glm::mat4(1.0f);
 Camera		RenderState::camera					= glm::vec3(0.0f, 0.0f, 6.0f);
 float		RenderState::orthoHeight			= 1.0f;
-
-glm::vec3	RenderState::dirLightDir			= glm::vec3(-0.5f, -0.2f, -1.0f);
-glm::vec3	RenderState::dirLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
-float		RenderState::dirAmbientStrength		= 0.2f;
-float		RenderState::dirSpecularStrength	= 1.0f;
-float		RenderState::dirDiffuseStrength		= 0.5f;
-bool		RenderState::openDirLight			= true;
-
-glm::vec3	RenderState::poiLightPos			= glm::vec3(-1.0f, -1.0f, 2.0f);
-glm::vec3	RenderState::poiLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
-float		RenderState::poiAmbientStrength		= 0.2f;
-float		RenderState::poiSpecularStrength	= 1.0f;
-float		RenderState::poiDiffuseStrength		= 0.5f;
-bool		RenderState::openPoiLight			= true;
-
-glm::vec3	RenderState::spoLightCol			= glm::vec3(1.0f, 1.0f, 1.0f);
-float		RenderState::spoAmbientStrength		= 1.0;
-float		RenderState::spoSpecularStrength	= 1.0f;
-float		RenderState::spoDiffuseStrength		= 1.0;
-float		RenderState::spoCutOff				= 8.5f;
-bool		RenderState::openSpoLight			= false;
-
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());

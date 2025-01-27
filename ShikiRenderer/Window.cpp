@@ -33,11 +33,17 @@ Window::Window(){
 Window::~Window() { glfwTerminate(); }
 void Window::Render() {
 	Gui gui(window);
-	Object box;
+	Object box("Box");
 	Shader boxShader("../shader/box.vs", "../shader/box.fs");
 	Model backpack("../resources/model/backpack/backpack.obj");
+	Object oBackpack("Backpack");
 	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
 	box.position = glm::vec3(1.0f, 1.0f, 0.0f);
+	oBackpack.position = glm::vec3(-2.0f, 1.0f, 0.0f);
+	Light dirLight("Directional Light", DIRECTION);
+	Light PointLight("Point Light", POINT);
+	Light SpotLight("Spot Light", SPOT);
+
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
 		{
@@ -50,91 +56,18 @@ void Window::Render() {
 				RenderState::clearColor.w
 			);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			if (RenderState::drawWithLine) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 		//äÖÈ¾
 		{
 			RenderState::updateTransform();
-			DefaultOperation::drawBox(box, boxShader);
-			DefaultOperation::drawBackpack(backpack, backpackShader);
+			Draw::drawBox(box, boxShader);
+			Draw::drawBackpack(backpack, oBackpack, backpackShader);
 		}
-		//GUI
-		{
-			gui.newFrame();
-			ImGui::Begin("__BASIC CONFIGURE__");
-			ImGui::Text("PRESS C TO ENTER CAMERA MODE");
-			if (true) {
-				if (!RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-					RenderState::inCameraMode = true;
-				}
-				else if (RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-					RenderState::inCameraMode = false;
-				}
-			}
-			if (ImGui::BeginMenu("Renderer Configure")) {
-				ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
-				ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Projection Mode")) {
-				if (ImGui::MenuItem("Perspective"))		RenderState::perspective = true;
-				if (ImGui::MenuItem("Orthographic"))	RenderState::perspective = false;
-				ImGui::PushItemWidth(200.0f);
-				ImGui::SliderFloat("Orthographic Scope", &RenderState::orthoHeight, 0.0f, 10.0f);
-				ImGui::PopItemWidth();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Directional Light")) {
-				ImGui::Checkbox("Open Directional Light", &RenderState::openDirLight);
-				ImGui::PushItemWidth(200.0f);
-				ImGui::Text("Configure:");
-				ImGui::SliderFloat3("Direction", &RenderState::dirLightDir[0], -3.0f, 3.0f);
-				ImGui::SliderFloat3("Color", &RenderState::dirLightCol[0], 0.0f, 1.0f);
-				ImGui::SliderFloat("Ambient Strength", &RenderState::dirAmbientStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Specular Strength", &RenderState::dirSpecularStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Diffuse Strength", &RenderState::dirDiffuseStrength, 0.0f, 1.0f);
-				ImGui::PopItemWidth();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Point Light")) {
-				ImGui::Checkbox("Open Point Light", &RenderState::openPoiLight);
-				ImGui::PushItemWidth(200.0f);
-				ImGui::Text("Configure:");
-				ImGui::SliderFloat3("Position", &RenderState::poiLightPos[0], -3.0f, 3.0f);
-				ImGui::SliderFloat3("Color", &RenderState::poiLightCol[0], 0.0f, 1.0f);
-				ImGui::SliderFloat("Ambient Strength", &RenderState::poiAmbientStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Specular Strength", &RenderState::poiSpecularStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Diffuse Strength", &RenderState::poiDiffuseStrength, 0.0f, 1.0f);
-				ImGui::PopItemWidth();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Spot Light")) {
-				ImGui::Checkbox("Open Spot Light", &RenderState::openSpoLight);
-				ImGui::PushItemWidth(200.0f);
-				ImGui::Text("Configure:");
-				ImGui::SliderFloat3("Color", &RenderState::spoLightCol[0], 0.0f, 1.0f);
-				ImGui::SliderFloat("Ambient Strength", &RenderState::spoAmbientStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Specular Strength", &RenderState::spoSpecularStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Diffuse Strength", &RenderState::spoDiffuseStrength, 0.0f, 1.0f);
-				ImGui::SliderFloat("Cut Off", &RenderState::spoCutOff, 5.0f, 60.0f);
-				ImGui::PopItemWidth();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Box")) {
-				ImGui::PushItemWidth(200.0f);
-				ImGui::Text("Rotation: ");
-				ImGui::SliderAngle("Pitch(x-axis)", &box.rotation[0], -180.0f, 180.0f);
-				ImGui::SliderAngle("Yaw(y-axis)", &box.rotation[1], -180.0f, 180.0f);
-				ImGui::SliderAngle("Roll(z-axis)", &box.rotation[2], -180.0f, 180.0f);
-				ImGui::PopItemWidth();
-				ImGui::SliderFloat3("Transform", &box.position[0], -8.0f, 8.0f);
-				ImGui::SliderFloat3("Scale", &box.scale[0], 0.0f, 5.0f);
-				ImGui::EndMenu();
-			}
-			ImGui::End();
-			gui.endFrame();
-		}
+
+		gui.update(window);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
