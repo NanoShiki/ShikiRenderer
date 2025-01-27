@@ -47,6 +47,7 @@ unsigned int DefaultOperation::loadTexture(const char* path)
 	return textureID;
 }
 void DefaultOperation::drawBox(Object& box, Shader& shader) {
+	DefaultOperation::loadBoxTexture();
 	DefaultOperation::setupShader(shader);
 
 	glm::mat4 boxModel = glm::mat4(1.0f);
@@ -174,7 +175,7 @@ void DefaultOperation::setupShader(Shader& shader) {
 void DefaultOperation::drawBackpack(Model& backpack, Shader& shader) {
 	DefaultOperation::setupShader(shader);
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-1.0f, -1.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(-2.0f, -2.0f, 0.0f));
 	shader.setMat4("model", model);
 	shader.setMat3("normalMatrix", DefaultOperation::getNormalMatrix(model));
 	backpack.Draw(shader);

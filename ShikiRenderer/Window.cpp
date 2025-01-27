@@ -54,7 +54,6 @@ void Window::Render() {
 		//‰÷»æ
 		{
 			RenderState::updateTransform();
-			DefaultOperation::loadBoxTexture();
 			DefaultOperation::drawBox(box, boxShader);
 			DefaultOperation::drawBackpack(backpack, backpackShader);
 		}
