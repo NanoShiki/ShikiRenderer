@@ -50,8 +50,12 @@ void Gui::update(GLFWwindow* window) {
 	}
 	if (ImGui::BeginMenu("Renderer Configure")) {
 		ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
-		ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
 		ImGui::Checkbox("Draw with Line", &RenderState::drawWithLine);
+		if (ImGui::BeginMenu("Depth")) {
+			ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
+			ImGui::Checkbox("Show Depth Map", &RenderState::showDepthMap);
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("Projection Mode")) {
 			if (ImGui::MenuItem("Perspective"))		RenderState::perspective = true;
 			if (ImGui::MenuItem("Orthographic"))	RenderState::perspective = false;

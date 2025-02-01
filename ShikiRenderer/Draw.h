@@ -17,11 +17,14 @@ public:
 	static void				loadBoxTexture();
 	static unsigned int		loadTexture(const char* path);
 	static void				drawBackpack(Model& backpack, Object& oBackpack, Shader& shader);
+	static void				drawPlane(Object& plane, Shader& shader);
 	static void				setupShader(Shader& shader);
 
 private:
-	static unsigned int		defaultVAO, defaultVBO;
+	static unsigned int		boxVAO, boxVBO;
+	static unsigned int		planeVAO, planeVBO;
 	static unsigned int		boxDiffuseMap, boxSpecularMap;
+	static unsigned int		planeDiffuseMap;
 	static glm::mat4		getNormalMatrix(glm::mat4& model);
 	
 };

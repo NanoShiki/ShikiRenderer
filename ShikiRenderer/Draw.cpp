@@ -1,15 +1,13 @@
 #include "Draw.h"
 
-unsigned int	Draw::defaultVAO = 0;
-unsigned int	Draw::defaultVBO = 0;
+unsigned int	Draw::boxVAO = 0;
+unsigned int	Draw::boxVBO = 0;
+unsigned int	Draw::planeVAO = 0;
+unsigned int	Draw::planeVBO = 0;
 unsigned int	Draw::boxDiffuseMap = 0;
 unsigned int	Draw::boxSpecularMap = 0;
+unsigned int	Draw::planeDiffuseMap = 0;
 
-void Draw::loadBoxTexture() {
-	if (Draw::boxDiffuseMap != 0) return;
-	Draw::boxDiffuseMap = Draw::loadTexture("../resources/texture/container2.png");
-	Draw::boxSpecularMap = Draw::loadTexture("../resources/texture/container2_specular.png");
-}
 unsigned int Draw::loadTexture(const char* path)
 {
 	unsigned int textureID;
@@ -47,7 +45,11 @@ unsigned int Draw::loadTexture(const char* path)
 	return textureID;
 }
 void Draw::drawBox(Object& box, Shader& shader) {
-	Draw::loadBoxTexture();
+	if (RenderState::haveColor)
+		if (Draw::boxDiffuseMap == 0) {
+			Draw::boxDiffuseMap = Draw::loadTexture("../resources/texture/container2.png");
+			Draw::boxSpecularMap = Draw::loadTexture("../resources/texture/container2_specular.png");
+		}
 	Draw::setupShader(shader);
 
 	glm::mat4 boxModel = glm::mat4(1.0f);
@@ -58,9 +60,8 @@ void Draw::drawBox(Object& box, Shader& shader) {
 	boxModel = glm::scale(boxModel, box.scale);
 	box.model = boxModel;
 	shader.setMat4("model", box.model);
-	shader.setMat3("normalMatrix", Draw::getNormalMatrix(box.model));
-
-	if (Draw::defaultVAO == 0) {
+	
+	if (Draw::boxVAO == 0) {
 		float boxVertices[] = {
 		//vertex			//texture		//normal
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
@@ -105,10 +106,10 @@ void Draw::drawBox(Object& box, Shader& shader) {
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
 		};
-		glGenVertexArrays(1, &Draw::defaultVAO);
-		glGenBuffers(1, &Draw::defaultVBO);
-		glBindVertexArray(Draw::defaultVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, Draw::defaultVBO);
+		glGenVertexArrays(1, &Draw::boxVAO);
+		glGenBuffers(1, &Draw::boxVBO);
+		glBindVertexArray(Draw::boxVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, Draw::boxVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
@@ -118,27 +119,30 @@ void Draw::drawBox(Object& box, Shader& shader) {
 		glEnableVertexAttribArray(2);
 	}
 	
-	shader.setInt("material.diffuseMap", 0);
-	shader.setInt("material.specularMap", 1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Draw::boxDiffuseMap);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Draw::boxSpecularMap);
-
+	if (RenderState::haveColor) {
+		shader.setMat3("normalMatrix", Draw::getNormalMatrix(box.model));
+		shader.setInt("material.diffuseMap", 0);
+		shader.setInt("material.specularMap", 1);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Draw::boxDiffuseMap);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Draw::boxSpecularMap);
+	}
+	
 	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
 
-	glBindVertexArray(Draw::defaultVAO);
+	glBindVertexArray(Draw::boxVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 glm::mat4 Draw::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
 void Draw::setupShader(Shader& shader) {
 	shader.use();
-	if (true) {
-		shader.setMat4("view", RenderState::view);
-		shader.setMat4("projection", RenderState::projection);
 
+	shader.setMat4("view", RenderState::view);
+	shader.setMat4("projection", RenderState::projection);
+	if (RenderState::haveColor) {
 		shader.setBool("dirLight.open", Light::allLights[0]->open);
 		shader.setBool("pointLight.open", Light::allLights[1]->open);
 		shader.setBool("spotLight.open", Light::allLights[2]->open);
@@ -182,6 +186,57 @@ void Draw::drawBackpack(Model& backpack, Object& oBackpack, Shader& shader) {
 	backpackModel = glm::scale(backpackModel, oBackpack.scale);
 	oBackpack.model = backpackModel;
 	shader.setMat4("model", oBackpack.model);
-	shader.setMat3("normalMatrix", Draw::getNormalMatrix(oBackpack.model));
+	if (RenderState::haveColor) shader.setMat3("normalMatrix", Draw::getNormalMatrix(oBackpack.model));
 	backpack.Draw(shader);
+}
+void Draw::drawPlane(Object& plane, Shader& shader) {
+	if (RenderState::haveColor)
+		if (Draw::planeDiffuseMap == 0) {
+			Draw::planeDiffuseMap = Draw::loadTexture("../resources/texture/metal.png");
+		}
+	Draw::setupShader(shader);
+
+	glm::mat4 planeModel = glm::mat4(1.0f);
+	planeModel = glm::translate(planeModel, plane.position);
+	planeModel = glm::rotate(planeModel, plane.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	planeModel = glm::rotate(planeModel, plane.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	planeModel = glm::rotate(planeModel, plane.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	planeModel = glm::scale(planeModel, plane.scale);
+	plane.model = planeModel;
+	shader.setMat4("model", plane.model);
+
+	if (Draw::planeVAO == 0) {
+		float planeVertices[] = {
+			 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+			-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+			 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+			 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+		};
+		glGenVertexArrays(1, &Draw::planeVAO);
+		glGenBuffers(1, &Draw::planeVBO);
+		glBindVertexArray(Draw::planeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, Draw::planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+
+	if (RenderState::haveColor) {
+		shader.setMat3("normalMatrix", Draw::getNormalMatrix(plane.model));
+		shader.setInt("material.diffuseMap", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Draw::planeDiffuseMap);
+	}
+
+	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
+	else glDisable(GL_DEPTH_TEST);
+
+	glBindVertexArray(Draw::planeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
 }

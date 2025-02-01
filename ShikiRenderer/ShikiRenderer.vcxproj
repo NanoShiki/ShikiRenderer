@@ -181,6 +181,10 @@
     <None Include="..\shader\backpack.vs" />
     <None Include="..\shader\box.fs" />
     <None Include="..\shader\box.vs" />
+    <None Include="..\shader\depthMap.fs" />
+    <None Include="..\shader\depthMap.vs" />
+    <None Include="..\shader\plane.fs" />
+    <None Include="..\shader\plane.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,6 +16,8 @@ glm::mat4	RenderState::projection				= glm::mat4(1.0f);
 glm::mat4	RenderState::view					= glm::mat4(1.0f);
 Camera		RenderState::camera					= glm::vec3(0.0f, 0.0f, 6.0f);
 float		RenderState::orthoHeight			= 1.0f;
+bool		RenderState::showDepthMap			= false;
+bool		RenderState::haveColor				= true;
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());

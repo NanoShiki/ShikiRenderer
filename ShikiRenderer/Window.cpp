@@ -34,16 +34,20 @@ Window::~Window() { glfwTerminate(); }
 void Window::Render() {
 	Gui gui(window);
 	Object box("Box");
-	Shader boxShader("../shader/box.vs", "../shader/box.fs");
-	Model backpack("../resources/model/backpack/backpack.obj");
+	Object plane("Plane");
 	Object oBackpack("Backpack");
+	Shader boxShader("../shader/box.vs", "../shader/box.fs");
 	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
-	box.position = glm::vec3(1.0f, 1.0f, 0.0f);
-	oBackpack.position = glm::vec3(-2.0f, 1.0f, 0.0f);
+	Shader planeShader("../shader/plane.vs", "../shader/plane.fs");
+	Shader depthMapShader("../shader/depthMap.vs", "../shader/depthMap.fs");
+	Model backpack("../resources/model/backpack/backpack.obj");
 	Light dirLight("Directional Light", DIRECTION);
 	Light PointLight("Point Light", POINT);
 	Light SpotLight("Spot Light", SPOT);
-
+	
+	box.position = glm::vec3(1.0f, 1.0f, 0.0f);
+	oBackpack.position = glm::vec3(-2.0f, 1.0f, 0.0f);
+	
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
 		{
@@ -62,8 +66,17 @@ void Window::Render() {
 		//äÖÈ¾
 		{
 			RenderState::updateTransform();
-			Draw::drawBox(box, boxShader);
-			Draw::drawBackpack(backpack, oBackpack, backpackShader);
+			if (RenderState::showDepthMap) {
+				Draw::drawPlane(plane, depthMapShader);
+				Draw::drawBox(box, depthMapShader);
+				Draw::drawBackpack(backpack, oBackpack, depthMapShader);
+			}
+			else {
+				Draw::drawPlane(plane, planeShader);
+				Draw::drawBox(box, boxShader);
+				Draw::drawBackpack(backpack, oBackpack, backpackShader);
+
+			}
 		}
 
 		gui.update(window);

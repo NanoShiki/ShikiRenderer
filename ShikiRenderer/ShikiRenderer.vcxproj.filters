@@ -160,5 +160,17 @@
     <None Include="..\shader\backpack.vs">
       <Filter>Shader</Filter>
     </None>
+    <None Include="..\shader\depthMap.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\depthMap.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\plane.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\plane.vs">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
