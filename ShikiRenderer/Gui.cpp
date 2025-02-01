@@ -51,6 +51,7 @@ void Gui::update(GLFWwindow* window) {
 	if (ImGui::BeginMenu("Renderer Configure")) {
 		ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
 		ImGui::Checkbox("Draw with Line", &RenderState::drawWithLine);
+		ImGui::Checkbox("Use Framebuffer", &RenderState::useFramebuffer);
 		if (ImGui::BeginMenu("Depth")) {
 			ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
 			ImGui::Checkbox("Show Depth Map", &RenderState::showDepthMap);
@@ -66,6 +67,16 @@ void Gui::update(GLFWwindow* window) {
 		}
 		ImGui::EndMenu();
 	}
+	if (ImGui::BeginMenu("Post-processing")) {
+		ImGui::Checkbox("Enable Post-processing", &RenderState::enablePostProcessing);
+		if (ImGui::MenuItem("Inversion")) RenderState::PostProcessingCounter = RenderState::INVERSION;
+		if (ImGui::MenuItem("Grayscale")) RenderState::PostProcessingCounter = RenderState::GRASCALE;
+		if (ImGui::MenuItem("Sharpen")) RenderState::PostProcessingCounter = RenderState::SHARPEN;
+		if (ImGui::MenuItem("Blur")) RenderState::PostProcessingCounter = RenderState::BLUR;
+		if (ImGui::MenuItem("Edge Detection")) RenderState::PostProcessingCounter = RenderState::EDGE_DETECTION;
+		ImGui::EndMenu();
+	}
+	ImGui::Text("HIERARCHY:");
 	for (auto light : Light::allLights) {
 		if (light->lightType == DIRECTION) {
 			if (ImGui::BeginMenu(light->name)) {

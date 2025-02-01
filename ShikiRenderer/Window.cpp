@@ -33,20 +33,41 @@ Window::Window(){
 Window::~Window() { glfwTerminate(); }
 void Window::Render() {
 	Gui gui(window);
-	Object box("Box");
 	Object plane("Plane");
 	Object oBackpack("Backpack");
-	Shader boxShader("../shader/box.vs", "../shader/box.fs");
-	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
 	Shader planeShader("../shader/plane.vs", "../shader/plane.fs");
+	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
 	Shader depthMapShader("../shader/depthMap.vs", "../shader/depthMap.fs");
+	Shader screenShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer.fs");
+	Shader inversionShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_inversion.fs");
+	Shader blurShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_blur.fs");
+	Shader grayscaleShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_grayscale.fs");
+	Shader sharpenShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_sharpen.fs");
+	Shader edgeDetectionShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_edge_detection.fs");
 	Model backpack("../resources/model/backpack/backpack.obj");
 	Light dirLight("Directional Light", DIRECTION);
 	Light PointLight("Point Light", POINT);
 	Light SpotLight("Spot Light", SPOT);
-	
-	box.position = glm::vec3(1.0f, 1.0f, 0.0f);
-	oBackpack.position = glm::vec3(-2.0f, 1.0f, 0.0f);
+	oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f);
+
+	unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	unsigned int textureColorbuffer;
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
@@ -59,23 +80,29 @@ void Window::Render() {
 				RenderState::clearColor.z,
 				RenderState::clearColor.w
 			);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			if (RenderState::drawWithLine) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			RenderState::drawWithLine? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 		//äÖÈ¾
 		{
+			RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RenderState::updateTransform();
-			if (RenderState::showDepthMap) {
-				Draw::drawPlane(plane, depthMapShader);
-				Draw::drawBox(box, depthMapShader);
-				Draw::drawBackpack(backpack, oBackpack, depthMapShader);
-			}
-			else {
-				Draw::drawPlane(plane, planeShader);
-				Draw::drawBox(box, boxShader);
-				Draw::drawBackpack(backpack, oBackpack, backpackShader);
-
+			Draw::drawPlane(plane, RenderState::showDepthMap ? depthMapShader : planeShader);
+			Draw::drawModel(backpack, oBackpack, RenderState::showDepthMap ? depthMapShader : backpackShader);
+			if (RenderState::useFramebuffer or RenderState::enablePostProcessing) {
+				if (RenderState::enablePostProcessing) {
+					if (RenderState::PostProcessingCounter == RenderState::INVERSION)
+						Draw::drawQuad(inversionShader, textureColorbuffer);
+					else if (RenderState::PostProcessingCounter == RenderState::GRASCALE)
+						Draw::drawQuad(grayscaleShader, textureColorbuffer);
+					else if (RenderState::PostProcessingCounter == RenderState::SHARPEN)
+						Draw::drawQuad(sharpenShader, textureColorbuffer);
+					else if (RenderState::PostProcessingCounter == RenderState::BLUR)
+						Draw::drawQuad(blurShader, textureColorbuffer);
+					else if (RenderState::PostProcessingCounter == RenderState::EDGE_DETECTION)
+						Draw::drawQuad(edgeDetectionShader, textureColorbuffer);
+				}
+				else Draw::drawQuad(screenShader, textureColorbuffer);
 			}
 		}
 

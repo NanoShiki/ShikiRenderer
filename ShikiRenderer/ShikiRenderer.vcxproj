@@ -179,10 +179,15 @@
   <ItemGroup>
     <None Include="..\shader\backpack.fs" />
     <None Include="..\shader\backpack.vs" />
-    <None Include="..\shader\box.fs" />
-    <None Include="..\shader\box.vs" />
     <None Include="..\shader\depthMap.fs" />
     <None Include="..\shader\depthMap.vs" />
+    <None Include="..\shader\framebuffer\framebuffer.fs" />
+    <None Include="..\shader\framebuffer\framebuffer.vs" />
+    <None Include="..\shader\framebuffer\framebuffer_blur.fs" />
+    <None Include="..\shader\framebuffer\framebuffer_edge_detection.fs" />
+    <None Include="..\shader\framebuffer\framebuffer_grayscale.fs" />
+    <None Include="..\shader\framebuffer\framebuffer_inversion.fs" />
+    <None Include="..\shader\framebuffer\framebuffer_sharpen.fs" />
     <None Include="..\shader\plane.fs" />
     <None Include="..\shader\plane.vs" />
   </ItemGroup>

@@ -10,6 +10,7 @@
 
 class RenderState {
 public:
+	static enum PostProcessing{ INVERSION, GRASCALE, SHARPEN, BLUR, EDGE_DETECTION};
 	static bool			drawWithLine;
 	static bool			enableDepthTest;		
 	static bool			perspective;			
@@ -27,6 +28,9 @@ public:
 	static float		orthoHeight;			//设定正交矩阵高度
 	static bool			showDepthMap;
 	static bool			haveColor;				//设定是否渲染颜色
+	static bool			useFramebuffer;
+	static bool			enablePostProcessing;
+	static int			PostProcessingCounter;
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)

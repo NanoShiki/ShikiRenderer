@@ -19,6 +19,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{1ec89eca-d8aa-4334-a3d7-2bb2745a255b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\framebuffer">
+      <UniqueIdentifier>{d2079867-fe3c-4fd5-868b-426a2732623b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -148,12 +151,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader\box.vs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\box.fs">
-      <Filter>Shader</Filter>
-    </None>
     <None Include="..\shader\backpack.fs">
       <Filter>Shader</Filter>
     </None>
@@ -171,6 +168,27 @@
     </None>
     <None Include="..\shader\plane.vs">
       <Filter>Shader</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer.fs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer.vs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer_blur.fs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer_edge_detection.fs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer_grayscale.fs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer_inversion.fs">
+      <Filter>Shader\framebuffer</Filter>
+    </None>
+    <None Include="..\shader\framebuffer\framebuffer_sharpen.fs">
+      <Filter>Shader\framebuffer</Filter>
     </None>
   </ItemGroup>
 </Project>

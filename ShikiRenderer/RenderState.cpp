@@ -18,6 +18,9 @@ Camera		RenderState::camera					= glm::vec3(0.0f, 0.0f, 6.0f);
 float		RenderState::orthoHeight			= 1.0f;
 bool		RenderState::showDepthMap			= false;
 bool		RenderState::haveColor				= true;
+bool		RenderState::useFramebuffer			= false;
+int			RenderState::PostProcessingCounter	= 0;
+bool		RenderState::enablePostProcessing	= false;
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());

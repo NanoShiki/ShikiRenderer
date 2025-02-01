@@ -1,12 +1,10 @@
 #include "Draw.h"
 
-unsigned int	Draw::boxVAO = 0;
-unsigned int	Draw::boxVBO = 0;
 unsigned int	Draw::planeVAO = 0;
 unsigned int	Draw::planeVBO = 0;
-unsigned int	Draw::boxDiffuseMap = 0;
-unsigned int	Draw::boxSpecularMap = 0;
 unsigned int	Draw::planeDiffuseMap = 0;
+unsigned int	Draw::quadVAO = 0;
+unsigned int	Draw::quadVBO = 0;
 
 unsigned int Draw::loadTexture(const char* path)
 {
@@ -43,98 +41,6 @@ unsigned int Draw::loadTexture(const char* path)
 	}
 
 	return textureID;
-}
-void Draw::drawBox(Object& box, Shader& shader) {
-	if (RenderState::haveColor)
-		if (Draw::boxDiffuseMap == 0) {
-			Draw::boxDiffuseMap = Draw::loadTexture("../resources/texture/container2.png");
-			Draw::boxSpecularMap = Draw::loadTexture("../resources/texture/container2_specular.png");
-		}
-	Draw::setupShader(shader);
-
-	glm::mat4 boxModel = glm::mat4(1.0f);
-	boxModel = glm::translate(boxModel, box.position);
-	boxModel = glm::rotate(boxModel, box.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
-	boxModel = glm::rotate(boxModel, box.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
-	boxModel = glm::rotate(boxModel, box.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
-	boxModel = glm::scale(boxModel, box.scale);
-	box.model = boxModel;
-	shader.setMat4("model", box.model);
-	
-	if (Draw::boxVAO == 0) {
-		float boxVertices[] = {
-		//vertex			//texture		//normal
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
-		};
-		glGenVertexArrays(1, &Draw::boxVAO);
-		glGenBuffers(1, &Draw::boxVBO);
-		glBindVertexArray(Draw::boxVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, Draw::boxVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-	}
-	
-	if (RenderState::haveColor) {
-		shader.setMat3("normalMatrix", Draw::getNormalMatrix(box.model));
-		shader.setInt("material.diffuseMap", 0);
-		shader.setInt("material.specularMap", 1);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Draw::boxDiffuseMap);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, Draw::boxSpecularMap);
-	}
-	
-	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
-	else glDisable(GL_DEPTH_TEST);
-
-	glBindVertexArray(Draw::boxVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
 }
 glm::mat4 Draw::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
 void Draw::setupShader(Shader& shader) {
@@ -176,23 +82,24 @@ void Draw::setupShader(Shader& shader) {
 		shader.setVec3("viewPos", RenderState::camera.Position);
 	}
 }
-void Draw::drawBackpack(Model& backpack, Object& oBackpack, Shader& shader) {
+void Draw::drawModel(Model& model, Object& obj, Shader& shader) {
+	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 	Draw::setupShader(shader);
 	glm::mat4 backpackModel = glm::mat4(1.0f);
-	backpackModel = glm::translate(backpackModel, oBackpack.position);
-	backpackModel = glm::rotate(backpackModel, oBackpack.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
-	backpackModel = glm::rotate(backpackModel, oBackpack.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
-	backpackModel = glm::rotate(backpackModel, oBackpack.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
-	backpackModel = glm::scale(backpackModel, oBackpack.scale);
-	oBackpack.model = backpackModel;
-	shader.setMat4("model", oBackpack.model);
-	if (RenderState::haveColor) shader.setMat3("normalMatrix", Draw::getNormalMatrix(oBackpack.model));
-	backpack.Draw(shader);
+	backpackModel = glm::translate(backpackModel, obj.position);
+	backpackModel = glm::rotate(backpackModel, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	backpackModel = glm::rotate(backpackModel, obj.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	backpackModel = glm::rotate(backpackModel, obj.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	backpackModel = glm::scale(backpackModel, obj.scale);
+	obj.model = backpackModel;
+	shader.setMat4("model", obj.model);
+	if (RenderState::haveColor) shader.setMat3("normalMatrix", Draw::getNormalMatrix(obj.model));
+	model.Draw(shader);
 }
 void Draw::drawPlane(Object& plane, Shader& shader) {
 	if (RenderState::haveColor)
 		if (Draw::planeDiffuseMap == 0) {
-			Draw::planeDiffuseMap = Draw::loadTexture("../resources/texture/metal.png");
+			Draw::planeDiffuseMap = Draw::loadTexture("../resources/texture/plane/diffuse.jpg");
 		}
 	Draw::setupShader(shader);
 
@@ -239,4 +146,36 @@ void Draw::drawPlane(Object& plane, Shader& shader) {
 	glBindVertexArray(Draw::planeVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
+}
+void Draw::drawQuad(Shader& shader, unsigned int& textureColorbuffer) {
+	if (Draw::quadVAO == 0) {
+		float quadVertices[] = {
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+		};
+		glGenVertexArrays(1, &Draw::quadVAO);
+		glGenBuffers(1, &Draw::quadVBO);
+		glBindVertexArray(Draw::quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, Draw::quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_DEPTH_TEST);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	shader.use();
+	glBindVertexArray(quadVAO);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
