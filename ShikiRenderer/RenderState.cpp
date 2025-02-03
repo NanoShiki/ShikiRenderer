@@ -21,6 +21,7 @@ bool		RenderState::haveColor				= true;
 bool		RenderState::useFramebuffer			= false;
 int			RenderState::PostProcessingCounter	= 0;
 bool		RenderState::enablePostProcessing	= false;
+bool		RenderState::enableSkybox			= true;
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());
@@ -28,10 +29,7 @@ void RenderState::updateFrame() {
 	RenderState::lastFrame = currentFrame;
 }
 void RenderState::updateTransform() {
-	RenderState::view = glm::mat4(1.0f);
-	if (RenderState::inCameraMode) RenderState::view = RenderState::camera.GetViewMatrix();
-	else RenderState::view = glm::translate(RenderState::view, glm::vec3(0.0f, 0.0f, -6.0f));
-
+	RenderState::view = RenderState::camera.GetViewMatrix();
 	float resolution = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 	if (RenderState::perspective)
 		RenderState::projection = glm::perspective(

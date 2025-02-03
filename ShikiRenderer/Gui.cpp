@@ -52,6 +52,7 @@ void Gui::update(GLFWwindow* window) {
 		ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
 		ImGui::Checkbox("Draw with Line", &RenderState::drawWithLine);
 		ImGui::Checkbox("Use Framebuffer", &RenderState::useFramebuffer);
+		ImGui::Checkbox("Skybox", &RenderState::enableSkybox);
 		if (ImGui::BeginMenu("Depth")) {
 			ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
 			ImGui::Checkbox("Show Depth Map", &RenderState::showDepthMap);

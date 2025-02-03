@@ -16,6 +16,7 @@ public:
 	unsigned int ID;
 	
 	Shader(const char* vertexPath, const char* fragmentPath);
+	inline Shader(){}
 	inline void use() { glUseProgram(ID); }
 	inline void setBool(const std::string& name, const bool& value) const { glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); }
 	inline void setInt(const std::string& name, const int& value) const { glUniform1i(glGetUniformLocation(ID, name.c_str()), value); }

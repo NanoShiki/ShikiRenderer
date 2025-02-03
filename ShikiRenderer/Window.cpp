@@ -33,21 +33,15 @@ Window::Window(){
 Window::~Window() { glfwTerminate(); }
 void Window::Render() {
 	Gui gui(window);
-	Object plane("Plane");
+	//backpack data
 	Object oBackpack("Backpack");
-	Shader planeShader("../shader/plane.vs", "../shader/plane.fs");
 	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
-	Shader depthMapShader("../shader/depthMap.vs", "../shader/depthMap.fs");
-	Shader screenShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer.fs");
-	Shader inversionShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_inversion.fs");
-	Shader blurShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_blur.fs");
-	Shader grayscaleShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_grayscale.fs");
-	Shader sharpenShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_sharpen.fs");
-	Shader edgeDetectionShader("../shader/framebuffer/framebuffer.vs", "../shader/framebuffer/framebuffer_edge_detection.fs");
 	Model backpack("../resources/model/backpack/backpack.obj");
+	//-------------
 	Light dirLight("Directional Light", DIRECTION);
 	Light PointLight("Point Light", POINT);
 	Light SpotLight("Spot Light", SPOT);
+
 	oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f);
 
 	unsigned int framebuffer;
@@ -81,29 +75,24 @@ void Window::Render() {
 				RenderState::clearColor.w
 			);
 			RenderState::drawWithLine? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			if (RenderState::inCameraMode && RenderState::firstMouse) {
+				RenderState::lastX = RenderState::SCREEN_WIDTH / 2.0f;
+				RenderState::lastY = RenderState::SCREEN_HEIGHT / 2.0f;
+				glfwSetCursorPos(this->window, RenderState::lastX, RenderState::lastY);
+				RenderState::firstMouse = false;
+			}
+			else if (!RenderState::inCameraMode) RenderState::firstMouse = true;
 		}
 		//‰÷»æ
 		{
+			if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
 			RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RenderState::updateTransform();
-			Draw::drawPlane(plane, RenderState::showDepthMap ? depthMapShader : planeShader);
-			Draw::drawModel(backpack, oBackpack, RenderState::showDepthMap ? depthMapShader : backpackShader);
-			if (RenderState::useFramebuffer or RenderState::enablePostProcessing) {
-				if (RenderState::enablePostProcessing) {
-					if (RenderState::PostProcessingCounter == RenderState::INVERSION)
-						Draw::drawQuad(inversionShader, textureColorbuffer);
-					else if (RenderState::PostProcessingCounter == RenderState::GRASCALE)
-						Draw::drawQuad(grayscaleShader, textureColorbuffer);
-					else if (RenderState::PostProcessingCounter == RenderState::SHARPEN)
-						Draw::drawQuad(sharpenShader, textureColorbuffer);
-					else if (RenderState::PostProcessingCounter == RenderState::BLUR)
-						Draw::drawQuad(blurShader, textureColorbuffer);
-					else if (RenderState::PostProcessingCounter == RenderState::EDGE_DETECTION)
-						Draw::drawQuad(edgeDetectionShader, textureColorbuffer);
-				}
-				else Draw::drawQuad(screenShader, textureColorbuffer);
-			}
+			Draw::drawPlane();
+			Draw::drawModel(backpack, oBackpack, backpackShader);
+			if (RenderState::enableSkybox) Draw::drawSkybox();
+			if (RenderState::useFramebuffer) Draw::drawQuad(textureColorbuffer);
 		}
 
 		gui.update(window);
@@ -115,26 +104,26 @@ void Window::Render() {
 }
 void Window::frame_buffer_size_callback(GLFWwindow* window, int width, int height) { glViewport(0, 0, width, height); }
 void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
-	float xpos = static_cast<float>(xposIn);
-	float ypos = static_cast<float>(yposIn);
-	if (RenderState::firstMouse) {
+	if (RenderState::inCameraMode) {
+		float xpos = static_cast<float>(xposIn);
+		float ypos = static_cast<float>(yposIn);
+		float xoffset = xpos - RenderState::lastX;
+		float yoffset = RenderState::lastY - ypos;
 		RenderState::lastX = xpos;
 		RenderState::lastY = ypos;
-		RenderState::firstMouse = false;
+		RenderState::camera.ProcessMouseMovement(xoffset, yoffset);
 	}
-	float xoffset = xpos - RenderState::lastX;
-	float yoffset = RenderState::lastY - ypos;
-	RenderState::lastX = xpos;
-	RenderState::lastY = ypos;
-	RenderState::camera.ProcessMouseMovement(xoffset, yoffset);
 }
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset){ 
-	RenderState::camera.ProcessMouseScroll(static_cast<float>(yoffset)); 
+	if (RenderState::inCameraMode)
+		RenderState::camera.ProcessMouseScroll(static_cast<float>(yoffset)); 
 }
 void Window::process_input(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(FORWARD, RenderState::deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(BACKWARD, RenderState::deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(LEFT, RenderState::deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(RIGHT, RenderState::deltaTime);
+	if (RenderState::inCameraMode) {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(FORWARD, RenderState::deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(BACKWARD, RenderState::deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(LEFT, RenderState::deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) RenderState::camera.ProcessKeyboard(RIGHT, RenderState::deltaTime);
+	}
 }
