@@ -6,9 +6,12 @@ out vec2 texCoord;
 out vec3 worldPos;
 out vec3 normal;
 
+layout (std140) uniform Matrices{
+	mat4 view;
+	mat4 projection;
+};
+
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 void main(){
 	worldPos	= vec3(model * vec4(aPos, 1.0));

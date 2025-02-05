@@ -14,6 +14,7 @@
 class Shader {
 public:
 	unsigned int ID;
+	bool have_been_setup;
 	
 	Shader(const char* vertexPath, const char* fragmentPath);
 	inline Shader(){}

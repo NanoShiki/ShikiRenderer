@@ -64,9 +64,22 @@ unsigned int Draw::loadCubeMap(std::vector<std::string>& faces) {
 glm::mat4 Draw::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
 void Draw::setupShader(Shader& shader) {
 	shader.use();
+	static unsigned int ubo = 0;
+	if (!shader.have_been_setup) {
+		unsigned int uniformBlockIndex = glGetUniformBlockIndex(shader.ID, "Matrices");
+		glUniformBlockBinding(shader.ID, uniformBlockIndex, 0);
+		glGenBuffers(1, &ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, ubo, 0, 2 * sizeof(glm::mat4));
+		shader.have_been_setup = true;
+	}
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(RenderState::view));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(RenderState::projection));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	shader.setMat4("view", RenderState::view);
-	shader.setMat4("projection", RenderState::projection);
 	if (RenderState::haveColor) {
 		shader.setBool("dirLight.open", Light::allLights[0]->open);
 		shader.setBool("pointLight.open", Light::allLights[1]->open);
@@ -100,6 +113,8 @@ void Draw::setupShader(Shader& shader) {
 		shader.setFloat("material.specularPow", 64.0f);
 		shader.setVec3("viewPos", RenderState::camera.Position);
 	}
+
+	shader.have_been_setup = true;
 }
 void Draw::drawModel(Model& model, Object& obj, Shader& mShader) {
 	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
