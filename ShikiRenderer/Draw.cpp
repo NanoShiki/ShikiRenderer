@@ -1,5 +1,8 @@
 #include "Draw.h"
 
+unsigned int Draw::uboMat = 0;
+unsigned int Draw::uboLight = 0;
+
 unsigned int Draw::loadTexture(const char* path)
 {
 	unsigned int textureID;
@@ -62,59 +65,94 @@ unsigned int Draw::loadCubeMap(std::vector<std::string>& faces) {
 	return textureID;
 }
 glm::mat4 Draw::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
-void Draw::setupShader(Shader& shader) {
-	shader.use();
-	static unsigned int ubo = 0;
-	if (!shader.have_been_setup) {
-		unsigned int uniformBlockIndex = glGetUniformBlockIndex(shader.ID, "Matrices");
-		glUniformBlockBinding(shader.ID, uniformBlockIndex, 0);
-		glGenBuffers(1, &ubo);
-		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+void Draw::updateUniform() {
+	static unsigned int uboMat = 0;
+	static unsigned int uboDirLight = 0;
+	static unsigned int uboPointLight = 0;
+	static unsigned int uboSpotLight = 0;
+	if (uboMat == 0) {
+		glGenBuffers(1, &uboMat);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMat);
 		glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, ubo, 0, 2 * sizeof(glm::mat4));
-		shader.have_been_setup = true;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMat, 0, 2 * sizeof(glm::mat4));
 	}
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMat);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(RenderState::view));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(RenderState::projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	if (RenderState::haveColor) {
-		shader.setBool("dirLight.open", Light::allLights[0]->open);
-		shader.setBool("pointLight.open", Light::allLights[1]->open);
-		shader.setBool("spotLight.open", Light::allLights[2]->open);
-
-		if (Light::allLights[0]->open) {
-			shader.setVec3("dirLight.direction", Light::allLights[0]->direction);
-			shader.setFloat("dirLight.ambientStrength", Light::allLights[0]->ambientStrength);
-			shader.setFloat("dirLight.specularStrength", Light::allLights[0]->specularStrength);
-			shader.setFloat("dirLight.diffuseStrength", Light::allLights[0]->diffuseStrength);
-			shader.setVec3("dirLight.lightCol", Light::allLights[0]->color);
-		}
-		if (Light::allLights[1]->open) {
-			shader.setVec3("pointLight.position", Light::allLights[1]->position);
-			shader.setFloat("pointLight.ambientStrength", Light::allLights[1]->ambientStrength);
-			shader.setFloat("pointLight.specularStrength", Light::allLights[1]->specularStrength);
-			shader.setFloat("pointLight.diffuseStrength", Light::allLights[1]->diffuseStrength);
-			shader.setVec3("pointLight.lightCol", Light::allLights[1]->color);
-		}
-		if (Light::allLights[2]->open) {
-			shader.setVec3("spotLight.position", Light::allLights[2]->position);
-			shader.setVec3("spotLight.direction", Light::allLights[2]->direction);
-			shader.setFloat("spotLight.ambientStrength", Light::allLights[2]->ambientStrength);
-			shader.setFloat("spotLight.specularStrength", Light::allLights[2]->specularStrength);
-			shader.setFloat("spotLight.diffuseStrength", Light::allLights[2]->diffuseStrength);
-			shader.setVec3("spotLight.lightCol", Light::allLights[2]->color);
-			shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(Light::allLights[2]->cutoff)));
-			shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(Light::allLights[2]->cutoff + 5.0f)));
-		}
-
-		shader.setFloat("material.specularPow", 64.0f);
-		shader.setVec3("viewPos", RenderState::camera.Position);
+	if (uboDirLight == 0) {
+		glGenBuffers(1, &uboDirLight);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboDirLight);
+		glBufferData(GL_UNIFORM_BUFFER, 48, NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, uboDirLight, 0, 48);
 	}
+	glBindBuffer(GL_UNIFORM_BUFFER, uboDirLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &Light::allLights[0]->open);
+	glBufferSubData(GL_UNIFORM_BUFFER, 4, 4, &Light::allLights[0]->ambientStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 8, 4, &Light::allLights[0]->specularStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &Light::allLights[0]->diffuseStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 16, &Light::allLights[0]->direction);
+	glBufferSubData(GL_UNIFORM_BUFFER, 32, 16, &Light::allLights[0]->color);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	shader.have_been_setup = true;
+	if (uboPointLight == 0) {
+		glGenBuffers(1, &uboPointLight);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboPointLight);
+		glBufferData(GL_UNIFORM_BUFFER, 48, NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 2, uboPointLight, 0, 48);
+	}
+	glBindBuffer(GL_UNIFORM_BUFFER, uboPointLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &Light::allLights[1]->open);
+	glBufferSubData(GL_UNIFORM_BUFFER, 4, 4, &Light::allLights[1]->ambientStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 8, 4, &Light::allLights[1]->specularStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &Light::allLights[1]->diffuseStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 16, &Light::allLights[1]->position);
+	glBufferSubData(GL_UNIFORM_BUFFER, 32, 16, &Light::allLights[1]->color);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	if (uboSpotLight == 0) {
+		glGenBuffers(1, &uboSpotLight);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboSpotLight);
+		glBufferData(GL_UNIFORM_BUFFER, 80, NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 3, uboSpotLight, 0, 80);
+	}
+	static float cutoff = 0;
+	cutoff = glm::cos(glm::radians(Light::allLights[2]->cutoff));
+	static float outerCutoff = 0;
+	outerCutoff = glm::cos(glm::radians(Light::allLights[2]->cutoff + 5.0f));
+	glBindBuffer(GL_UNIFORM_BUFFER, uboSpotLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &Light::allLights[2]->open);
+	glBufferSubData(GL_UNIFORM_BUFFER, 4, 4, &Light::allLights[2]->ambientStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 8, 4, &Light::allLights[2]->specularStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &Light::allLights[2]->diffuseStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &cutoff);
+	glBufferSubData(GL_UNIFORM_BUFFER, 20, 4, &outerCutoff);
+	glBufferSubData(GL_UNIFORM_BUFFER, 32, 16, &Light::allLights[2]->position);
+	glBufferSubData(GL_UNIFORM_BUFFER, 48, 16, &Light::allLights[2]->direction);
+	glBufferSubData(GL_UNIFORM_BUFFER, 64, 16, &Light::allLights[2]->color);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+void Draw::setupShader(Shader& shader) {
+	shader.use();
+	if (!shader.have_been_setup) {
+		unsigned int uniformBlockIndex0 = glGetUniformBlockIndex(shader.ID, "Matrices");
+		glUniformBlockBinding(shader.ID, uniformBlockIndex0, 0);
+		if (RenderState::haveColor) {
+			unsigned int uniformBlockIndex1 = glGetUniformBlockIndex(shader.ID, "DirLight");
+			glUniformBlockBinding(shader.ID, uniformBlockIndex1, 1);
+			unsigned int uniformBlockIndex2 = glGetUniformBlockIndex(shader.ID, "PointLight");
+			glUniformBlockBinding(shader.ID, uniformBlockIndex2, 2);
+			unsigned int uniformBlockIndex3 = glGetUniformBlockIndex(shader.ID, "SpotLight");
+			glUniformBlockBinding(shader.ID, uniformBlockIndex3, 3);
+		}
+		shader.have_been_setup = true;
+	}
+	shader.setFloat("material.specularPow", 64.0f);
+	shader.setVec3("viewPos", RenderState::camera.Position);
 }
 void Draw::drawModel(Model& model, Object& obj, Shader& mShader) {
 	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);

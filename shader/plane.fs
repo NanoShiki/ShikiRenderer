@@ -5,45 +5,41 @@ in vec2			texCoord;
 in vec3			normal;
 in vec3			worldPos;
 
-struct DirLight{
-	bool		open;
-	vec3		direction;
-
-	vec3		lightCol;
-	float		ambientStrength;
-	float		specularStrength;
-	float		diffuseStrength;
+layout (std140) uniform DirLight{
+	bool		DirOpen;
+	float		DirAmbientStrength;
+	float		DirSpecularStrength;
+	float		DirDiffuseStrength;
+	vec3		DirDirection;
+	vec3		DirLightCol;
 };
-uniform			DirLight dirLight;
 
-struct PointLight{
-	bool		open;
-	vec3		position;
-
-	vec3		lightCol;
-	float		ambientStrength;
-	float		specularStrength;
-	float		diffuseStrength;
+layout (std140) uniform PointLight{
+	bool		PointOpen;
+	float		PointAmbientStrength;
+	float		PointSpecularStrength;
+	float		PointDiffuseStrength;
+	vec3		PointPosition;
+	vec3		PointLightCol;
+	
 };
-uniform			PointLight pointLight;
 
-struct SpotLight{
-	bool		open;
-	vec3		position;
-	vec3		direction;
-	float		cutOff;
-	float		outerCutOff;
-
-	vec3		lightCol;
-	float		ambientStrength;
-	float		specularStrength;
-	float		diffuseStrength;
+layout (std140) uniform SpotLight{
+	bool		SpotOpen;
+	float		SpotAmbientStrength;
+	float		SpotSpecularStrength;
+	float		SpotDiffuseStrength;
+	float		SpotCutOff;
+	float		SpotOuterCutOff;
+	vec3		SpotPosition;
+	vec3		SpotDirection;
+	vec3		SpotLightCol;
+	
 };
-uniform			SpotLight spotLight;
 
 struct Material{
-	sampler2D	diffuseMap;
-	sampler2D	specularMap;
+	sampler2D	texture_diffuse1;
+	sampler2D	texture_specular1;
 	float		specularPow;
 };
 uniform			Material material;
@@ -51,65 +47,77 @@ uniform			Material material;
 uniform vec3	viewPos;
 uniform mat3	normalMatrix;
 
-vec3 calcDirLight(DirLight dirLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff);
-vec3 calcPointLight(PointLight pointLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff, vec3 worldPos);
-vec3 calcSpotLight(SpotLight spotLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff, vec3 worldPos);
+vec3 calcDirLight(vec3 viewDir, vec3 worldNormal);
+vec3 calcPointLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos);
+vec3 calcSpotLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos);
 
 void main(){
 	vec3 viewDir			= normalize(viewPos - worldPos);
 	vec3 worldNormal		= normalize(normalMatrix * normal);
-	vec3 halfwayVector		= normalize(-dirLight.direction + viewDir);
-	float diff				= max(dot(worldNormal, -dirLight.direction), 0.0);
 	vec3 result				= vec3(0.0, 0.0, 0.0);
-	if (dirLight.open)
-	result					+= calcDirLight(dirLight, viewDir, worldNormal, halfwayVector, diff);
-	if (pointLight.open)
-	result					+= calcPointLight(pointLight, viewDir, worldNormal, halfwayVector, diff, worldPos);
-	if (spotLight.open)
-	result					+= calcSpotLight(spotLight, viewDir, worldNormal, halfwayVector, diff, worldPos);
+	if (DirOpen)
+	result					+= calcDirLight(viewDir, worldNormal);
+	if (PointOpen)
+	result					+= calcPointLight(viewDir, worldNormal, worldPos);
+	if (SpotOpen)
+	result					+= calcSpotLight(viewDir, worldNormal, worldPos);
 	
 	fragColor				= vec4(result, 1.0);
 }
 
-vec3 calcDirLight(DirLight dirLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff){
-	vec3 ambient			= dirLight.lightCol * dirLight.ambientStrength * texture(material.diffuseMap, texCoord).rgb;
-	vec3 diffuse			= dirLight.lightCol * dirLight.diffuseStrength * diff * texture(material.diffuseMap, texCoord).rgb;
-	return (ambient + diffuse);
+vec3 calcDirLight(vec3 viewDir, vec3 worldNormal){
+	vec3 halfwayVector		= normalize(-DirDirection + viewDir);
+	float diff				= max(dot(worldNormal, -DirDirection), 0.0);
+	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
+	vec3 ambient			= DirLightCol * DirAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 diffuse			= DirLightCol * DirDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 specular			= DirLightCol * DirSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
+	return (ambient + diffuse + specular);
 }
 
-vec3 calcPointLight(PointLight pointLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff, vec3 worldPos){
-	vec3 lightDir			= normalize(pointLight.position - worldPos);
+vec3 calcPointLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
+	vec3 lightDir			= normalize(PointPosition - worldPos);
+	vec3 halfwayVector		= normalize(lightDir + viewDir);
+	float diff				= max(dot(worldNormal, lightDir), 0.0);
+	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
 	float constant			= 1.0;
 	float linear			= 0.09;
 	float quadratic			= 0.032;
-	float distance			= length(pointLight.position - worldPos);
+	float distance			= length(PointPosition - worldPos);
 	float attenuation		= 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
 
-	vec3 ambient			= pointLight.lightCol * pointLight.ambientStrength * texture(material.diffuseMap, texCoord).rgb;
-	vec3 diffuse			= pointLight.lightCol * pointLight.diffuseStrength * diff * texture(material.diffuseMap, texCoord).rgb;
+	vec3 ambient			= PointLightCol * PointAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 diffuse			= PointLightCol * PointDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 specular			= PointLightCol * PointSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
 
 	ambient					*= attenuation;
     diffuse					*= attenuation;
-	return (ambient + diffuse);
+    specular				*= attenuation;
+	return (ambient + diffuse + specular);
 }
 
-vec3 calcSpotLight(SpotLight spotLight, vec3 viewDir, vec3 worldNormal, vec3 halfwayVector, float diff, vec3 worldPos){
-	vec3 lightDir			= normalize(spotLight.position - worldPos);
+vec3 calcSpotLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
+	vec3 lightDir			= normalize(SpotPosition - worldPos);
+	vec3 halfwayVector		= normalize(lightDir + viewDir);
+	float diff				= max(dot(worldNormal, lightDir), 0.0);
+	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
 	float constant			= 1.0;
 	float linear			= 0.09;
 	float quadratic			= 0.032;
-	float distance			= length(spotLight.position - worldPos);
+	float distance			= length(SpotPosition - worldPos);
 	float attenuation		= 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
 
-	float theta				= dot(lightDir, normalize(-spotLight.direction));
-	float epsilon			= spotLight.cutOff - spotLight.outerCutOff;
-	float intensity			= clamp((theta - spotLight.outerCutOff) / epsilon, 0.0, 1.0);
+	float theta				= dot(lightDir, normalize(-SpotDirection));
+	float epsilon			= SpotCutOff - SpotOuterCutOff;
+	float intensity			= clamp((theta - SpotOuterCutOff) / epsilon, 0.0, 1.0);
 
-	vec3 ambient			= spotLight.lightCol * spotLight.ambientStrength * texture(material.diffuseMap, texCoord).rgb;
-	vec3 diffuse			= spotLight.lightCol * spotLight.diffuseStrength * diff * texture(material.diffuseMap, texCoord).rgb;
+	vec3 ambient			= SpotLightCol * SpotAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 diffuse			= SpotLightCol * SpotDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 specular			= SpotLightCol * SpotSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
 
 	ambient					*= attenuation * intensity;
     diffuse					*= attenuation * intensity;
+    specular				*= attenuation * intensity;
 
-	return (ambient + diffuse);
+	return (ambient + diffuse + specular);
 }

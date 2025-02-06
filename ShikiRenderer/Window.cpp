@@ -62,6 +62,7 @@ void Window::Render() {
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
@@ -85,6 +86,7 @@ void Window::Render() {
 		}
 		//äÖÈ¾
 		{
+			Draw::updateUniform();
 			if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
 			RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

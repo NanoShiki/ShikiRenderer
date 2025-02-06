@@ -24,9 +24,12 @@ public:
 	static void				drawQuad(unsigned int& textureColorbuffer);
 	static void				drawSkybox();
 	static Shader*			getShader(const std::string& vPath, const std::string& fPath);
+	static void				updateUniform();
 
 private:
 	static glm::mat4		getNormalMatrix(glm::mat4& model);
+	static unsigned int		uboMat;
+	static unsigned int		uboLight;
 	
 };
 
