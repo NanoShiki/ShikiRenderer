@@ -81,7 +81,7 @@ void Gui::update(GLFWwindow* window) {
 	for (auto light : Light::allLights) {
 		if (light->lightType == DIRECTION) {
 			if (ImGui::BeginMenu(light->name)) {
-				ImGui::Checkbox("Open Directional Light", &light->open);
+				ImGui::Checkbox("Open", &light->open);
 				ImGui::PushItemWidth(200.0f);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Direction", &light->direction[0], -3.0f, 3.0f);
@@ -97,7 +97,7 @@ void Gui::update(GLFWwindow* window) {
 			light->position = RenderState::camera.Position;
 			light->direction = RenderState::camera.Front;
 			if (ImGui::BeginMenu(light->name)) {
-				ImGui::Checkbox("Open Spot Light", &light->open);
+				ImGui::Checkbox("Open", &light->open);
 				ImGui::PushItemWidth(200.0f);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Color", &light->color[0], 0.0f, 1.0f);
@@ -111,7 +111,7 @@ void Gui::update(GLFWwindow* window) {
 		}
 		else if (light->lightType == POINT) {
 			if (ImGui::BeginMenu("Point Light")) {
-				ImGui::Checkbox("Open Point Light", &light->open);
+				ImGui::Checkbox("Open", &light->open);
 				ImGui::PushItemWidth(200.0f);
 				ImGui::Text("Configure:");
 				ImGui::SliderFloat3("Position", &light->position[0], -3.0f, 3.0f);

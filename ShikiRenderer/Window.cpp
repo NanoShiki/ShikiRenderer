@@ -33,49 +33,12 @@ Window::Window(){
 Window::~Window() { glfwTerminate(); }
 void Window::Render() {
 	Gui gui(window);
-	//backpack data
-	Object oBackpack("Backpack");
-	Shader backpackShader("../shader/backpack.vs", "../shader/backpack.fs");
-	Model backpack("../resources/model/backpack/backpack.obj");
-	//-------------
-	Light dirLight("Directional Light", DIRECTION);
-	Light PointLight("Point Light", POINT);
-	Light SpotLight("Spot Light", SPOT);
-
-	oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f);
-
-	unsigned int framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	unsigned int textureColorbuffer;
-	glGenTextures(1, &textureColorbuffer);
-	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-	unsigned int rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
 		{
 			RenderState::updateFrame();
 			process_input(window);
-			glClearColor(
-				RenderState::clearColor.x,
-				RenderState::clearColor.y,
-				RenderState::clearColor.z,
-				RenderState::clearColor.w
-			);
-			RenderState::drawWithLine? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			if (RenderState::inCameraMode && RenderState::firstMouse) {
 				RenderState::lastX = RenderState::SCREEN_WIDTH / 2.0f;
 				RenderState::lastY = RenderState::SCREEN_HEIGHT / 2.0f;
@@ -86,17 +49,9 @@ void Window::Render() {
 		}
 		//äÖÈ¾
 		{
-			Draw::updateUniform();
-			if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
-			RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			RenderState::updateTransform();
-			Draw::drawPlane();
-			Draw::drawModel(backpack, oBackpack, backpackShader);
-			if (RenderState::enableSkybox) Draw::drawSkybox();
-			if (RenderState::useFramebuffer) Draw::drawQuad(textureColorbuffer);
+			Draw::beforeRender();
+			Draw::render();
 		}
-
 		gui.update(window);
 
 		glfwSwapBuffers(window);

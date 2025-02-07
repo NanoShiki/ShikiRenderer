@@ -21,7 +21,6 @@ layout (std140) uniform PointLight{
 	float		PointDiffuseStrength;
 	vec3		PointPosition;
 	vec3		PointLightCol;
-	
 };
 
 layout (std140) uniform SpotLight{
@@ -34,7 +33,6 @@ layout (std140) uniform SpotLight{
 	vec3		SpotPosition;
 	vec3		SpotDirection;
 	vec3		SpotLightCol;
-	
 };
 
 struct Material{

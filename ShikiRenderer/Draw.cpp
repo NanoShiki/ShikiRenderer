@@ -1,7 +1,7 @@
 #include "Draw.h"
 
-unsigned int Draw::uboMat = 0;
-unsigned int Draw::uboLight = 0;
+unsigned int Draw::uboMat				= 0;
+unsigned int Draw::uboLight				= 0;
 
 unsigned int Draw::loadTexture(const char* path)
 {
@@ -154,9 +154,9 @@ void Draw::setupShader(Shader& shader) {
 	shader.setFloat("material.specularPow", 64.0f);
 	shader.setVec3("viewPos", RenderState::camera.Position);
 }
-void Draw::drawModel(Model& model, Object& obj, Shader& mShader) {
+void Draw::drawModel(Model& model, Object& obj) {
 	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-	Shader* shader = &mShader;
+	Shader* shader = getShader("../shader/" + std::string(obj.name) + ".vs", "../shader/" + std::string(obj.name) + ".fs");
 	if (RenderState::showDepthMap) shader = getShader("../shader/depthMap.vs", "../shader/depthMap.fs");
 	Draw::setupShader(*shader);
 	glm::mat4 backpackModel = glm::mat4(1.0f);
@@ -171,8 +171,8 @@ void Draw::drawModel(Model& model, Object& obj, Shader& mShader) {
 	model.Draw(*shader);
 }
 void Draw::drawPlane() {
-	static Object plane("Plane");
-	Shader* shader = getShader("../shader/plane.vs", "../shader/plane.fs");
+	static Object plane("plane");
+	Shader* shader = getShader("../shader/" + std::string(plane.name) + ".vs", "../shader/" + std::string(plane.name) + ".fs");
 	if (RenderState::showDepthMap) shader = getShader("../shader/depthMap.vs", "../shader/depthMap.fs");
 	static unsigned int planeDiffuseMap = 0;
 	if (RenderState::haveColor && planeDiffuseMap == 0)
@@ -360,4 +360,68 @@ void Draw::drawSkybox() {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
+}
+void Draw::beforeRender() {
+	//用于设置渲染器的一些参数
+	glClearColor(
+		RenderState::clearColor.x,
+		RenderState::clearColor.y,
+		RenderState::clearColor.z,
+		RenderState::clearColor.w
+	);
+	RenderState::drawWithLine ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
+
+	RenderState::updateTransform();
+}
+void Draw::render() {
+	//用于准备渲染需要使用的变量, 并调用对应函数
+	//backpack data
+	static Object oBackpack("backpack");
+	static Model backpack("../resources/model/backpack/backpack.obj");
+	//-------------
+	static Light dirLight("Directional Light", DIRECTION);
+	static Light PointLight("Point Light", POINT);
+	static Light SpotLight("Spot Light", SPOT);
+
+	oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f);
+
+	//准备好screen framebuffer
+	static unsigned int framebuffer = 0;
+	if (framebuffer == 0) {
+		glGenFramebuffers(1, &framebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	}
+	static unsigned int screenColorBuffer = 0;
+	if (screenColorBuffer == 0) {
+		glGenTextures(1, &screenColorBuffer);
+		glBindTexture(GL_TEXTURE_2D, screenColorBuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenColorBuffer, 0);
+	}
+	static unsigned int rbo = 0;
+	if (rbo == 0) {
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
+	RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Draw::updateUniform();
+	Draw::drawPlane();
+	Draw::drawModel(backpack, oBackpack);
+
+	if (RenderState::enableSkybox) Draw::drawSkybox();
+	if (RenderState::useFramebuffer) Draw::drawQuad(screenColorBuffer);
 }
