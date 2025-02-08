@@ -64,7 +64,7 @@ unsigned int Draw::loadCubeMap(std::vector<std::string>& faces) {
 
 	return textureID;
 }
-glm::mat4 Draw::getNormalMatrix(glm::mat4& model) { return glm::mat3(glm::transpose(glm::inverse(model))); }
+glm::mat4 Draw::getNormalMatrix(glm::mat4 mat) { return glm::mat3(glm::transpose(glm::inverse(mat))); }
 void Draw::updateUniform() {
 	static unsigned int uboMat = 0;
 	static unsigned int uboDirLight = 0;
@@ -141,7 +141,7 @@ void Draw::setupShader(Shader& shader) {
 	if (!shader.have_been_setup) {
 		unsigned int uniformBlockIndex0 = glGetUniformBlockIndex(shader.ID, "Matrices");
 		glUniformBlockBinding(shader.ID, uniformBlockIndex0, 0);
-		if (RenderState::haveColor) {
+		if (RenderState::haveColor && shader.have_light) {
 			unsigned int uniformBlockIndex1 = glGetUniformBlockIndex(shader.ID, "DirLight");
 			glUniformBlockBinding(shader.ID, uniformBlockIndex1, 1);
 			unsigned int uniformBlockIndex2 = glGetUniformBlockIndex(shader.ID, "PointLight");
@@ -151,13 +151,25 @@ void Draw::setupShader(Shader& shader) {
 		}
 		shader.have_been_setup = true;
 	}
-	shader.setFloat("material.specularPow", 64.0f);
-	shader.setVec3("viewPos", RenderState::camera.Position);
+	if (RenderState::haveColor && shader.have_light) {
+		shader.setFloat("material.specularPow", 64.0f);
+		shader.setVec3("viewPos", RenderState::camera.Position);
+	}
+	shader.setBool("enableGeometryShader", RenderState::enableGeometryShader);
 }
 void Draw::drawModel(Model& model, Object& obj) {
 	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-	Shader* shader = getShader("../shader/" + std::string(obj.name) + ".vs", "../shader/" + std::string(obj.name) + ".fs");
-	if (RenderState::showDepthMap) shader = getShader("../shader/depthMap.vs", "../shader/depthMap.fs");
+	Shader* shader = NULL;
+	if (RenderState::showDepthMap) shader = getShader(
+		"../shader/depthMap/depthMap.vs",
+		"../shader/depthMap/depthMap.fs");
+	else if (RenderState::enableGeometryShader) shader = getShader(
+		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".vs",
+		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".fs",
+		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".gs");
+	else shader = getShader(
+		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".vs",
+		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".fs");
 	Draw::setupShader(*shader);
 	glm::mat4 backpackModel = glm::mat4(1.0f);
 	backpackModel = glm::translate(backpackModel, obj.position);
@@ -168,12 +180,30 @@ void Draw::drawModel(Model& model, Object& obj) {
 	obj.model = backpackModel;
 	shader->setMat4("model", obj.model);
 	if (RenderState::haveColor) shader->setMat3("normalMatrix", Draw::getNormalMatrix(obj.model));
+	if (RenderState::enableGeometryShader) shader->setFloat("explosion", obj.explosion);
+	model.Draw(*shader);
+	if (RenderState::enableGeometryShader && obj.visualizeNormal) Draw::visualizeNormal(model, obj);
+}
+void Draw::visualizeNormal(Model& model, Object& obj) {
+	Shader* shader = getShader(
+		"../shader/visualizeNormal/visualizeNormal.vs",
+		"../shader/visualizeNormal/visualizeNormal.fs",
+		"../shader/visualizeNormal/visualizeNormal.gs");
+	shader->have_light = false;
+	Draw::setupShader(*shader);
+	shader->setMat4("model", obj.model);
+	shader->setMat3("normalMatrix", Draw::getNormalMatrix(RenderState::view * obj.model));
 	model.Draw(*shader);
 }
 void Draw::drawPlane() {
 	static Object plane("plane");
-	Shader* shader = getShader("../shader/" + std::string(plane.name) + ".vs", "../shader/" + std::string(plane.name) + ".fs");
-	if (RenderState::showDepthMap) shader = getShader("../shader/depthMap.vs", "../shader/depthMap.fs");
+	Shader* shader = NULL;
+	if (RenderState::showDepthMap) shader = getShader(
+		"../shader/depthMap/depthMap.vs",
+		"../shader/depthMap/depthMap.fs");
+	else shader = getShader(
+		"../shader/" + std::string(plane.name) + "/" + std::string(plane.name) + ".vs",
+		"../shader/" + std::string(plane.name) + "/" + std::string(plane.name) + ".fs");
 	static unsigned int planeDiffuseMap = 0;
 	if (RenderState::haveColor && planeDiffuseMap == 0)
 			planeDiffuseMap = Draw::loadTexture("../resources/texture/plane/diffuse.jpg");
@@ -216,6 +246,7 @@ void Draw::drawPlane() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, planeDiffuseMap);
 	}
+	shader->setFloat("explosion", plane.explosion);
 
 	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
@@ -278,8 +309,14 @@ Shader* Draw::getShader(const std::string& vp, const std::string& fp) {
 	if (shaders.find(key) == shaders.end()) shaders.emplace(key, Shader(vp.c_str(), fp.c_str()));
 	return &shaders[key];
 }
+Shader* Draw::getShader(const std::string& vp, const std::string& fp, const std::string& gp) {
+	static std::unordered_map<std::string, Shader> Gshaders;
+	std::string key = vp + "|" + fp + "|" + gp;
+	if (Gshaders.find(key) == Gshaders.end()) Gshaders.emplace(key, Shader(vp.c_str(), fp.c_str(), gp.c_str()));
+	return &Gshaders[key];
+}
 void Draw::drawSkybox() {
-	Shader* shader = getShader("../shader/skybox.vs", "../shader/skybox.fs");
+	Shader* shader = getShader("../shader/skybox/skybox.vs", "../shader/skybox/skybox.fs");
 	static unsigned int VAO = 0, VBO = 0;
 	if (VAO == 0) {
 		float skyboxVertices[] = {

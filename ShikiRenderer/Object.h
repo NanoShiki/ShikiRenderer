@@ -14,6 +14,8 @@ public:
 	glm::vec3	position;
 	glm::vec3	scale;
 	glm::mat4	model;
+	float		explosion;
+	bool		visualizeNormal;
 	static std::vector<Object*> allObjects;
 	
 	Object(const char* name);

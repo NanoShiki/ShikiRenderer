@@ -2,6 +2,7 @@
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath){
 	have_been_setup = false;
+	have_light = true;
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
@@ -50,6 +51,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath){
 }
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
 	have_been_setup = false;
+	have_light = true;
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::string geometryCode;
@@ -98,7 +100,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	geometry = glCreateShader(GL_GEOMETRY_SHADER);
 	glShaderSource(geometry, 1, &gShaderCode, NULL);
 	glCompileShader(geometry);
-	checkCompileErrors(geometry, "FRAGMENT");
+	checkCompileErrors(geometry, "GEOMETRY");
 
 	ID = glCreateProgram();
 	glAttachShader(ID, vertex);

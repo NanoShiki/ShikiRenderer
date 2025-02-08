@@ -19,17 +19,19 @@ public:
 	static unsigned int		loadTexture(const char* path);
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
 	static void				drawModel(Model& model, Object& obj);
+	static void				visualizeNormal(Model& model, Object& obj);
 	static void				drawPlane();
 	static void				setupShader(Shader& shader);
 	static void				drawQuad(unsigned int& textureColorbuffer);
 	static void				drawSkybox();
 	static Shader*			getShader(const std::string& vPath, const std::string& fPath);
+	static Shader*			getShader(const std::string& vPath, const std::string& fPath, const std::string& gPath);
 	static void				updateUniform();
 	static void				beforeRender();
 	static void				render();
 
 private:
-	static glm::mat4		getNormalMatrix(glm::mat4& model);
+	static glm::mat4		getNormalMatrix(glm::mat4 mat);
 	static unsigned int		uboMat;
 	static unsigned int		uboLight;
 	static unsigned int		screenColorBuffer;

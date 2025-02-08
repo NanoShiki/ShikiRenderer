@@ -52,6 +52,7 @@ void Gui::update(GLFWwindow* window) {
 		ImGui::ColorEdit3("Clear Color", (float*)&RenderState::clearColor);
 		ImGui::Checkbox("Draw with Line", &RenderState::drawWithLine);
 		ImGui::Checkbox("Use Framebuffer", &RenderState::useFramebuffer);
+		ImGui::Checkbox("Enable Geometry Shader", &RenderState::enableGeometryShader);
 		ImGui::Checkbox("Skybox", &RenderState::enableSkybox);
 		if (ImGui::BeginMenu("Depth")) {
 			ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
@@ -134,6 +135,11 @@ void Gui::update(GLFWwindow* window) {
 			ImGui::PopItemWidth();
 			ImGui::SliderFloat3("Transform", &object->position[0], -8.0f, 8.0f);
 			ImGui::SliderFloat3("Scale", &object->scale[0], 0.0f, 5.0f);
+			if (RenderState::enableGeometryShader && object->name != "plane") {
+				ImGui::SliderFloat("Explosion", &object->explosion, 0.0f, 5.0f);
+				ImGui::Checkbox("Visualize Normal", &object->visualizeNormal);
+				if (object->visualizeNormal) object->explosion = 0.0f;
+			}
 			ImGui::EndMenu();
 		}
 	}

@@ -22,6 +22,21 @@
     <Filter Include="Shader\framebuffer">
       <UniqueIdentifier>{d2079867-fe3c-4fd5-868b-426a2732623b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\visualizeNormal">
+      <UniqueIdentifier>{a0662c40-ade8-4985-a822-d47302d7534c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\backpack">
+      <UniqueIdentifier>{2f521a15-8d8e-4516-80ba-7af7657aff06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\skybox">
+      <UniqueIdentifier>{97208dd3-7e2c-4df1-894c-30d690a8a448}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\plane">
+      <UniqueIdentifier>{231637c6-faf3-42b5-89a7-d1520f7b4cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\depthMap">
+      <UniqueIdentifier>{224f396b-d0b5-44ce-b36a-acd18d1a4e94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -151,24 +166,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader\backpack.fs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\backpack.vs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\depthMap.fs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\depthMap.vs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\plane.fs">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="..\shader\plane.vs">
-      <Filter>Shader</Filter>
-    </None>
     <None Include="..\shader\framebuffer\framebuffer.fs">
       <Filter>Shader\framebuffer</Filter>
     </None>
@@ -190,11 +187,41 @@
     <None Include="..\shader\framebuffer\framebuffer_sharpen.fs">
       <Filter>Shader\framebuffer</Filter>
     </None>
-    <None Include="..\shader\skybox.fs">
-      <Filter>Shader</Filter>
+    <None Include="..\shader\visualizeNormal\visualizeNormal.fs">
+      <Filter>Shader\visualizeNormal</Filter>
     </None>
-    <None Include="..\shader\skybox.vs">
-      <Filter>Shader</Filter>
+    <None Include="..\shader\visualizeNormal\visualizeNormal.gs">
+      <Filter>Shader\visualizeNormal</Filter>
+    </None>
+    <None Include="..\shader\visualizeNormal\visualizeNormal.vs">
+      <Filter>Shader\visualizeNormal</Filter>
+    </None>
+    <None Include="..\shader\backpack\backpack.fs">
+      <Filter>Shader\backpack</Filter>
+    </None>
+    <None Include="..\shader\backpack\backpack.gs">
+      <Filter>Shader\backpack</Filter>
+    </None>
+    <None Include="..\shader\backpack\backpack.vs">
+      <Filter>Shader\backpack</Filter>
+    </None>
+    <None Include="..\shader\skybox\skybox.fs">
+      <Filter>Shader\skybox</Filter>
+    </None>
+    <None Include="..\shader\skybox\skybox.vs">
+      <Filter>Shader\skybox</Filter>
+    </None>
+    <None Include="..\shader\plane\plane.fs">
+      <Filter>Shader\plane</Filter>
+    </None>
+    <None Include="..\shader\plane\plane.vs">
+      <Filter>Shader\plane</Filter>
+    </None>
+    <None Include="..\shader\depthMap\depthMap.fs">
+      <Filter>Shader\depthMap</Filter>
+    </None>
+    <None Include="..\shader\depthMap\depthMap.vs">
+      <Filter>Shader\depthMap</Filter>
     </None>
   </ItemGroup>
 </Project>
