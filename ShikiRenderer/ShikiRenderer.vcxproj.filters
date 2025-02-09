@@ -37,6 +37,9 @@
     <Filter Include="Shader\depthMap">
       <UniqueIdentifier>{224f396b-d0b5-44ce-b36a-acd18d1a4e94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\planet">
+      <UniqueIdentifier>{9eebafac-b0a9-4c6d-bbd0-2976cdb1c8fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -222,6 +225,15 @@
     </None>
     <None Include="..\shader\depthMap\depthMap.vs">
       <Filter>Shader\depthMap</Filter>
+    </None>
+    <None Include="..\shader\planet\planet.fs">
+      <Filter>Shader\planet</Filter>
+    </None>
+    <None Include="..\shader\planet\planet.gs">
+      <Filter>Shader\planet</Filter>
+    </None>
+    <None Include="..\shader\planet\planet.vs">
+      <Filter>Shader\planet</Filter>
     </None>
   </ItemGroup>
 </Project>

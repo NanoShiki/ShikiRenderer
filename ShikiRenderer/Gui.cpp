@@ -53,7 +53,15 @@ void Gui::update(GLFWwindow* window) {
 		ImGui::Checkbox("Draw with Line", &RenderState::drawWithLine);
 		ImGui::Checkbox("Use Framebuffer", &RenderState::useFramebuffer);
 		ImGui::Checkbox("Enable Geometry Shader", &RenderState::enableGeometryShader);
-		ImGui::Checkbox("Skybox", &RenderState::enableSkybox);
+		if (ImGui::BeginMenu("Skybox")) {
+			ImGui::Checkbox("Enable Skybox", &RenderState::enableSkybox);
+			if (ImGui::BeginMenu("Type")) {
+				if (ImGui::MenuItem("Space")) Draw::skyboxType = Draw::SPACE;
+				if (ImGui::MenuItem("Lake")) Draw::skyboxType = Draw::LAKE;
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("Depth")) {
 			ImGui::Checkbox("Depth Test", &RenderState::enableDepthTest);
 			ImGui::Checkbox("Show Depth Map", &RenderState::showDepthMap);
@@ -133,8 +141,8 @@ void Gui::update(GLFWwindow* window) {
 			ImGui::SliderAngle("Yaw(y-axis)", &object->rotation[1], -180.0f, 180.0f);
 			ImGui::SliderAngle("Roll(z-axis)", &object->rotation[2], -180.0f, 180.0f);
 			ImGui::PopItemWidth();
-			ImGui::SliderFloat3("Transform", &object->position[0], -8.0f, 8.0f);
-			ImGui::SliderFloat3("Scale", &object->scale[0], 0.0f, 5.0f);
+			ImGui::SliderFloat3("Transform", &object->position[0], -100.0f, 100.0f);
+			ImGui::SliderFloat3("Scale", &object->scale[0], 0.0f, 10.0f);
 			if (RenderState::enableGeometryShader && object->name != "plane") {
 				ImGui::SliderFloat("Explosion", &object->explosion, 0.0f, 5.0f);
 				ImGui::Checkbox("Visualize Normal", &object->visualizeNormal);

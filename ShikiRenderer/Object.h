@@ -16,9 +16,11 @@ public:
 	glm::mat4	model;
 	float		explosion;
 	bool		visualizeNormal;
+	bool		init;
 	static std::vector<Object*> allObjects;
 	
 	Object(const char* name);
+	Object() {};
 };
 
 #endif//OBJECT_H

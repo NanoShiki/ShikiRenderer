@@ -2,6 +2,9 @@
 D:\A_myLearning\ShikiRenderer\ShikiRenderer\RenderState.h(13,14): warning C4091: 'static ': ignored on left of 'RenderState::PostProcessing' when no variable is declared
   (compiling source file 'Draw.cpp')
   
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.h(19,17): warning C4091: 'static ': ignored on left of 'Draw::skyboxType' when no variable is declared
+  (compiling source file 'Draw.cpp')
+  
 glfw3.lib(input.obj) : warning LNK4099: PDB '' was not found with 'glfw3.lib(input.obj)' or at ''; linking object as if no debug info
 glfw3.lib(init.obj) : warning LNK4099: PDB '' was not found with 'glfw3.lib(init.obj)' or at ''; linking object as if no debug info
 glfw3.lib(monitor.obj) : warning LNK4099: PDB '' was not found with 'glfw3.lib(monitor.obj)' or at ''; linking object as if no debug info

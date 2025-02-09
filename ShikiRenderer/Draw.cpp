@@ -2,6 +2,7 @@
 
 unsigned int Draw::uboMat				= 0;
 unsigned int Draw::uboLight				= 0;
+unsigned int Draw::skyboxType			= 0;
 
 unsigned int Draw::loadTexture(const char* path)
 {
@@ -171,13 +172,13 @@ void Draw::drawModel(Model& model, Object& obj) {
 		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".vs",
 		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".fs");
 	Draw::setupShader(*shader);
-	glm::mat4 backpackModel = glm::mat4(1.0f);
-	backpackModel = glm::translate(backpackModel, obj.position);
-	backpackModel = glm::rotate(backpackModel, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
-	backpackModel = glm::rotate(backpackModel, obj.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
-	backpackModel = glm::rotate(backpackModel, obj.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
-	backpackModel = glm::scale(backpackModel, obj.scale);
-	obj.model = backpackModel;
+	glm::mat4 modelMat = glm::mat4(1.0f);
+	modelMat = glm::translate(modelMat, obj.position);
+	modelMat = glm::rotate(modelMat, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMat = glm::scale(modelMat, obj.scale);
+	obj.model = modelMat;
 	shader->setMat4("model", obj.model);
 	if (RenderState::haveColor) shader->setMat3("normalMatrix", Draw::getNormalMatrix(obj.model));
 	if (RenderState::enableGeometryShader) shader->setFloat("explosion", obj.explosion);
@@ -371,16 +372,29 @@ void Draw::drawSkybox() {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 	}
+	static std::string name = "space";
+	std::string key = name;
+	if		(Draw::skyboxType == Draw::SPACE)	name = "space";
+	else if (Draw::skyboxType == Draw::LAKE)	name = "lake";
 	static std::vector<std::string> faces;
 	if (faces.size() == 0) {
-		faces.push_back("../resources/texture/skybox/right.jpg");
-		faces.push_back("../resources/texture/skybox/left.jpg");
-		faces.push_back("../resources/texture/skybox/top.jpg");
-		faces.push_back("../resources/texture/skybox/bottom.jpg");
-		faces.push_back("../resources/texture/skybox/front.jpg");
-		faces.push_back("../resources/texture/skybox/back.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/right.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/left.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/top.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/bottom.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/front.jpg");
+		faces.push_back("../resources/texture/skybox/" + name + "/back.jpg");
 	}
-	static unsigned int cubemap = loadCubeMap(faces);
+	else if (key != name) {
+		faces[0] = ("../resources/texture/skybox/" + name + "/right.jpg");
+		faces[1] = ("../resources/texture/skybox/" + name + "/left.jpg");
+		faces[2] = ("../resources/texture/skybox/" + name + "/top.jpg");
+		faces[3] = ("../resources/texture/skybox/" + name + "/bottom.jpg");
+		faces[4] = ("../resources/texture/skybox/" + name + "/front.jpg");
+		faces[5] = ("../resources/texture/skybox/" + name + "/back.jpg");
+	}
+	static std::unordered_map<std::string, unsigned int> cubemaps; 
+	if (cubemaps.find(key) == cubemaps.end()) cubemaps.emplace(key, loadCubeMap(faces));
 
 	shader->use();
 	shader->setInt("skybox", 0);
@@ -393,7 +407,7 @@ void Draw::drawSkybox() {
 	shader->setMat4("projection", projection);
 	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemaps[key]);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
@@ -417,12 +431,21 @@ void Draw::render() {
 	//backpack data
 	static Object oBackpack("backpack");
 	static Model backpack("../resources/model/backpack/backpack.obj");
+	if (!oBackpack.init) oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f); oBackpack.init = true;
+	//planet data
+	static Object oPlanet("planet");
+	static Model planet("../resources/model/planet/planet.obj");
+	if (!oPlanet.init) {
+		oPlanet.position = glm::vec3(10.0f, 30.0f, -70.0f);
+		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
+		oPlanet.init = true;
+	}
 	//-------------
 	static Light dirLight("Directional Light", DIRECTION);
 	static Light PointLight("Point Light", POINT);
 	static Light SpotLight("Spot Light", SPOT);
 
-	oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f);
+	
 
 	//×¼±¸ºÃscreen framebuffer
 	static unsigned int framebuffer = 0;
@@ -458,6 +481,7 @@ void Draw::render() {
 	Draw::updateUniform();
 	Draw::drawPlane();
 	Draw::drawModel(backpack, oBackpack);
+	Draw::drawModel(planet, oPlanet);
 
 	if (RenderState::enableSkybox) Draw::drawSkybox();
 	if (RenderState::useFramebuffer) Draw::drawQuad(screenColorBuffer);

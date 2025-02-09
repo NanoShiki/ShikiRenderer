@@ -189,6 +189,9 @@
     <None Include="..\shader\framebuffer\framebuffer_grayscale.fs" />
     <None Include="..\shader\framebuffer\framebuffer_inversion.fs" />
     <None Include="..\shader\framebuffer\framebuffer_sharpen.fs" />
+    <None Include="..\shader\planet\planet.fs" />
+    <None Include="..\shader\planet\planet.gs" />
+    <None Include="..\shader\planet\planet.vs" />
     <None Include="..\shader\plane\plane.fs" />
     <None Include="..\shader\plane\plane.vs" />
     <None Include="..\shader\skybox\skybox.fs" />
