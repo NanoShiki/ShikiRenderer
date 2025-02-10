@@ -148,6 +148,7 @@ void Gui::update(GLFWwindow* window) {
 				ImGui::Checkbox("Visualize Normal", &object->visualizeNormal);
 				if (object->visualizeNormal) object->explosion = 0.0f;
 			}
+			if (object->name == "planet") ImGui::SliderInt("Rock Amount", &Draw::rockAmount, 0, 10000);
 			ImGui::EndMenu();
 		}
 	}

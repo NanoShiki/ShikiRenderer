@@ -35,9 +35,9 @@ void RenderState::updateTransform() {
 	if (RenderState::perspective)
 		RenderState::projection = glm::perspective(
 			RenderState::inCameraMode ? glm::radians(RenderState::camera.Zoom) : glm::radians(45.0f),
-			resolution, 0.1f, 100.0f);
+			resolution, 0.1f, 200.0f);
 	else RenderState::projection = glm::ortho(
 		-orthoHeight * resolution,
 		 orthoHeight * resolution,
-		-orthoHeight, orthoHeight, 0.1f, 100.0f);
+		-orthoHeight, orthoHeight, 0.1f, 200.0f);
 }

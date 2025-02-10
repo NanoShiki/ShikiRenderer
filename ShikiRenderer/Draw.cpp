@@ -1,8 +1,7 @@
 #include "Draw.h"
 
-unsigned int Draw::uboMat				= 0;
-unsigned int Draw::uboLight				= 0;
-unsigned int Draw::skyboxType			= 0;
+unsigned int	Draw::skyboxType			= 0;
+int				Draw::rockAmount			= 1000;
 
 unsigned int Draw::loadTexture(const char* path)
 {
@@ -171,7 +170,7 @@ void Draw::drawModel(Model& model, Object& obj) {
 	else shader = getShader(
 		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".vs",
 		"../shader/" + std::string(obj.name) + "/" + std::string(obj.name) + ".fs");
-	Draw::setupShader(*shader);
+	setupShader(*shader);
 	glm::mat4 modelMat = glm::mat4(1.0f);
 	modelMat = glm::translate(modelMat, obj.position);
 	modelMat = glm::rotate(modelMat, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
@@ -180,10 +179,10 @@ void Draw::drawModel(Model& model, Object& obj) {
 	modelMat = glm::scale(modelMat, obj.scale);
 	obj.model = modelMat;
 	shader->setMat4("model", obj.model);
-	if (RenderState::haveColor) shader->setMat3("normalMatrix", Draw::getNormalMatrix(obj.model));
+	if (RenderState::haveColor) shader->setMat3("normalMatrix", getNormalMatrix(obj.model));
 	if (RenderState::enableGeometryShader) shader->setFloat("explosion", obj.explosion);
 	model.Draw(*shader);
-	if (RenderState::enableGeometryShader && obj.visualizeNormal) Draw::visualizeNormal(model, obj);
+	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
 }
 void Draw::visualizeNormal(Model& model, Object& obj) {
 	Shader* shader = getShader(
@@ -191,9 +190,9 @@ void Draw::visualizeNormal(Model& model, Object& obj) {
 		"../shader/visualizeNormal/visualizeNormal.fs",
 		"../shader/visualizeNormal/visualizeNormal.gs");
 	shader->have_light = false;
-	Draw::setupShader(*shader);
+	setupShader(*shader);
 	shader->setMat4("model", obj.model);
-	shader->setMat3("normalMatrix", Draw::getNormalMatrix(RenderState::view * obj.model));
+	shader->setMat3("normalMatrix", getNormalMatrix(RenderState::view * obj.model));
 	model.Draw(*shader);
 }
 void Draw::drawPlane() {
@@ -207,8 +206,8 @@ void Draw::drawPlane() {
 		"../shader/" + std::string(plane.name) + "/" + std::string(plane.name) + ".fs");
 	static unsigned int planeDiffuseMap = 0;
 	if (RenderState::haveColor && planeDiffuseMap == 0)
-			planeDiffuseMap = Draw::loadTexture("../resources/texture/plane/diffuse.jpg");
-	Draw::setupShader(*shader);
+			planeDiffuseMap = loadTexture("../resources/texture/plane/diffuse.jpg");
+	setupShader(*shader);
 
 	glm::mat4 planeModel = glm::mat4(1.0f);
 	planeModel = glm::translate(planeModel, plane.position);
@@ -242,7 +241,7 @@ void Draw::drawPlane() {
 	}
 
 	if (RenderState::haveColor) {
-		shader->setMat3("normalMatrix", Draw::getNormalMatrix(plane.model));
+		shader->setMat3("normalMatrix", getNormalMatrix(plane.model));
 		shader->setInt("material.diffuseMap", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, planeDiffuseMap);
@@ -374,8 +373,8 @@ void Draw::drawSkybox() {
 	}
 	static std::string name = "space";
 	std::string key = name;
-	if		(Draw::skyboxType == Draw::SPACE)	name = "space";
-	else if (Draw::skyboxType == Draw::LAKE)	name = "lake";
+	if		(skyboxType == SPACE)	name = "space";
+	else if (skyboxType == LAKE)	name = "lake";
 	static std::vector<std::string> faces;
 	if (faces.size() == 0) {
 		faces.push_back("../resources/texture/skybox/" + name + "/right.jpg");
@@ -436,7 +435,7 @@ void Draw::render() {
 	static Object oPlanet("planet");
 	static Model planet("../resources/model/planet/planet.obj");
 	if (!oPlanet.init) {
-		oPlanet.position = glm::vec3(10.0f, 30.0f, -70.0f);
+		oPlanet.position = glm::vec3(10.0f, -15.0f, -50.0f);
 		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
 		oPlanet.init = true;
 	}
@@ -444,8 +443,6 @@ void Draw::render() {
 	static Light dirLight("Directional Light", DIRECTION);
 	static Light PointLight("Point Light", POINT);
 	static Light SpotLight("Spot Light", SPOT);
-
-	
 
 	//×¼±¸ºÃscreen framebuffer
 	static unsigned int framebuffer = 0;
@@ -478,11 +475,86 @@ void Draw::render() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Draw::updateUniform();
-	Draw::drawPlane();
-	Draw::drawModel(backpack, oBackpack);
-	Draw::drawModel(planet, oPlanet);
+	updateUniform();
+	drawPlane();
+	drawModel(backpack, oBackpack);
+	drawModel(planet, oPlanet);
+	instancingRock(oPlanet);
 
-	if (RenderState::enableSkybox) Draw::drawSkybox();
-	if (RenderState::useFramebuffer) Draw::drawQuad(screenColorBuffer);
+	if (RenderState::enableSkybox) drawSkybox();
+	if (RenderState::useFramebuffer) drawQuad(screenColorBuffer);
+}
+void Draw::instancingRock(Object planet) {
+	static Model rock("../resources/model/rock/rock.obj");
+	static int amount = 0;
+	static std::vector<glm::mat4> modelMatrices;
+	static glm::vec3 scale = planet.scale;
+	if ((amount != rockAmount || scale != planet.scale) && rockAmount != 0) {
+		scale = planet.scale;
+		modelMatrices.clear();
+		amount = rockAmount;
+		srand(glfwGetTime());
+		float radius = std::sqrt(planet.scale.x * planet.scale.x +
+			planet.scale.y * planet.scale.y + planet.scale.z * planet.scale.z) + 40.0f;
+		float offset = 2.5f;
+		for (unsigned int i = 0; i < rockAmount; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+
+			float angle = (float)i / (float)rockAmount * 360.0f;
+			float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+			float x = sin(angle) * radius + displacement;
+			displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+			float y = displacement * 0.4f;
+			displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+			float z = cos(angle) * radius + displacement;
+			model = glm::translate(model, glm::vec3(x, y, z));
+			model = glm::translate(model, planet.position);
+
+			float scale = (rand() % 20) / 100.0f + 0.05;
+			model = glm::scale(model, glm::vec3(scale));
+			float rotAngle = (rand() % 360);
+			model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+			modelMatrices.push_back(model);
+		}
+		unsigned int buffer = 0;
+		glGenBuffers(1, &buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glBufferData(GL_ARRAY_BUFFER, rockAmount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+		for (unsigned int i = 0; i < rock.meshes.size(); i++)
+		{
+			unsigned int VAO = rock.meshes[i].VAO;
+			glBindVertexArray(VAO);
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+			glEnableVertexAttribArray(5);
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(6);
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+			glVertexAttribDivisor(3, 1);
+			glVertexAttribDivisor(4, 1);
+			glVertexAttribDivisor(5, 1);
+			glVertexAttribDivisor(6, 1);
+
+			glBindVertexArray(0);
+		}
+	}
+	else if (rockAmount == 0) return;
+	Shader* shader = getShader("../shader/rock/rock.vs", "../shader/rock/rock.fs");
+	shader->have_light = false;
+	shader->use();
+	static unsigned int uniformBlockIndex0 = glGetUniformBlockIndex(shader->ID, "Matrices");
+	glUniformBlockBinding(shader->ID, uniformBlockIndex0, 0);
+	shader->setInt("texture_diffuse1", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, rock.textures_loaded[0].id);
+	for (unsigned int i = 0; i < rock.meshes.size(); i++) {
+		glBindVertexArray(rock.meshes[i].VAO);
+		glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(rock.meshes[i].indices.size()), GL_UNSIGNED_INT, 0, rockAmount);
+		glBindVertexArray(0);
+	}
 }

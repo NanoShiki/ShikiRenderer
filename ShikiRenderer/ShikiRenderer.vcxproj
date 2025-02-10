@@ -194,6 +194,8 @@
     <None Include="..\shader\planet\planet.vs" />
     <None Include="..\shader\plane\plane.fs" />
     <None Include="..\shader\plane\plane.vs" />
+    <None Include="..\shader\rock\rock.fs" />
+    <None Include="..\shader\rock\rock.vs" />
     <None Include="..\shader\skybox\skybox.fs" />
     <None Include="..\shader\skybox\skybox.vs" />
     <None Include="..\shader\visualizeNormal\visualizeNormal.fs" />

@@ -17,6 +17,7 @@
 class Draw {
 public:
 	static enum				skyboxType{SPACE, LAKE};
+	static int				rockAmount;
 	static unsigned int		skyboxType;
 	static unsigned int		loadTexture(const char* path);
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
@@ -31,13 +32,10 @@ public:
 	static void				updateUniform();
 	static void				beforeRender();
 	static void				render();
-	static void				drawRock();
+	static void				instancingRock(Object planet);
 
 private:
 	static glm::mat4		getNormalMatrix(glm::mat4 mat);
-	static unsigned int		uboMat;
-	static unsigned int		uboLight;
-	static unsigned int		screenColorBuffer;
 	
 };
 
