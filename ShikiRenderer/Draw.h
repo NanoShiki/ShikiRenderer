@@ -18,7 +18,7 @@ class Draw {
 public:
 	static enum				skyboxType{SPACE, LAKE};
 	static int				rockAmount;
-	static unsigned int		skyboxType;
+	static int				skyboxType;
 	static unsigned int		loadTexture(const char* path);
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
 	static void				drawModel(Model& model, Object& obj);

@@ -37,8 +37,7 @@ void Window::Render() {
 	while (!glfwWindowShouldClose(window)) {
 		//äÖÈ¾Æ÷Ä¬ÈÏ²Ù×÷
 		{
-			RenderState::updateFrame();
-			process_input(window);
+			RenderState::updateFrame();	
 			if (RenderState::inCameraMode && RenderState::firstMouse) {
 				RenderState::lastX = RenderState::SCREEN_WIDTH / 2.0f;
 				RenderState::lastY = RenderState::SCREEN_HEIGHT / 2.0f;
@@ -46,6 +45,7 @@ void Window::Render() {
 				RenderState::firstMouse = false;
 			}
 			else if (!RenderState::inCameraMode) RenderState::firstMouse = true;
+			process_input(window);
 		}
 		//äÖÈ¾
 		{

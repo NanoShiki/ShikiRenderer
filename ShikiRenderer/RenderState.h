@@ -28,7 +28,7 @@ public:
 	static float		orthoHeight;			//设定正交矩阵高度
 	static bool			showDepthMap;
 	static bool			haveColor;				//设定是否渲染颜色
-	static bool			useFramebuffer;
+	static bool			enableFramebuffer;
 	static bool			enablePostProcessing;
 	static int			PostProcessingCounter;
 	static bool			enableSkybox;

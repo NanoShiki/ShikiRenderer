@@ -6,13 +6,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <string>
 
 enum LightType{DIRECTION, POINT, SPOT};
 
 class Light {
 public:
 	bool open;
-	const char* name;
+	std::string name;
 	glm::vec3 color;
 	glm::vec3 direction;
 	glm::vec3 position;
@@ -22,7 +23,7 @@ public:
 	float diffuseStrength;
 	float specularStrength;
 
-	Light(const char* name, LightType lightType, 
+	Light(std::string name, LightType lightType, 
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f), 
 		float aS = 0.2f, float dS = 0.8f, float sS = 1.0f);
 	static std::vector<Light*> allLights;

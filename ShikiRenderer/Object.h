@@ -9,7 +9,7 @@
 
 class Object {
 public:
-	const char* name;
+	std::string name;
 	glm::vec3	rotation;
 	glm::vec3	position;
 	glm::vec3	scale;
@@ -19,7 +19,7 @@ public:
 	bool		init;
 	static std::vector<Object*> allObjects;
 	
-	Object(const char* name);
+	Object(std::string name);
 	Object() {};
 };
 

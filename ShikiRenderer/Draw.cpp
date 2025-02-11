@@ -1,6 +1,6 @@
 #include "Draw.h"
 
-unsigned int	Draw::skyboxType			= 0;
+int				Draw::skyboxType			= 0;
 int				Draw::rockAmount			= 1000;
 
 unsigned int Draw::loadTexture(const char* path)
@@ -421,7 +421,7 @@ void Draw::beforeRender() {
 	);
 	RenderState::drawWithLine ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
+	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
 
 	RenderState::updateTransform();
 }
@@ -435,7 +435,7 @@ void Draw::render() {
 	static Object oPlanet("planet");
 	static Model planet("../resources/model/planet/planet.obj");
 	if (!oPlanet.init) {
-		oPlanet.position = glm::vec3(10.0f, -15.0f, -50.0f);
+		oPlanet.position = glm::vec3(10.0f, 30.0f, -50.0f);
 		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
 		oPlanet.init = true;
 	}
@@ -470,8 +470,8 @@ void Draw::render() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	if (RenderState::enablePostProcessing) RenderState::useFramebuffer = true;
-	RenderState::useFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
+	RenderState::enableFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -482,7 +482,7 @@ void Draw::render() {
 	instancingRock(oPlanet);
 
 	if (RenderState::enableSkybox) drawSkybox();
-	if (RenderState::useFramebuffer) drawQuad(screenColorBuffer);
+	if (RenderState::enableFramebuffer) drawQuad(screenColorBuffer);
 }
 void Draw::instancingRock(Object planet) {
 	static Model rock("../resources/model/rock/rock.obj");

@@ -2,7 +2,7 @@
 
 std::vector<Light*> Light::allLights = {};
 
-Light::Light(const char* name, LightType lightType, 
+Light::Light(std::string name, LightType lightType, 
 	glm::vec3 color, float aS, float dS, float sS) :
 	name(name), 
 	lightType(lightType), 
