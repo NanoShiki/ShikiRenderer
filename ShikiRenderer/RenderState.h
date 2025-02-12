@@ -33,6 +33,8 @@ public:
 	static int			PostProcessingCounter;
 	static bool			enableSkybox;
 	static bool			enableGeometryShader;
+	static bool			enableMSAA;
+	static int			samplesNum;
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)

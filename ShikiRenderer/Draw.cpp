@@ -255,7 +255,7 @@ void Draw::drawPlane() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 }
-void Draw::drawQuad(unsigned int& textureColorbuffer) {
+void Draw::drawQuad(unsigned int& fbo, unsigned int& textureColorbuffer) {
 	Shader* shader = NULL;
 	if (RenderState::enablePostProcessing) {
 		if (RenderState::PostProcessingCounter == RenderState::INVERSION)
@@ -293,14 +293,39 @@ void Draw::drawQuad(unsigned int& textureColorbuffer) {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	}
 
+	static unsigned int msColorBuffer = 0;
+	static unsigned int intermediateFBO = 0;
+	if (RenderState::enableMSAA) {
+		if (intermediateFBO == 0) {
+			glGenFramebuffers(1, &intermediateFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+		}
+		if (msColorBuffer == 0) {
+			glGenTextures(1, &msColorBuffer);
+			glBindTexture(GL_TEXTURE_2D, msColorBuffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, msColorBuffer, 0);
+		}
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+		glBlitFramebuffer(0, 0, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, 0, 0, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	unsigned int& colorBuffer = RenderState::enableMSAA ? msColorBuffer : textureColorbuffer;
+
 	shader->use();
 	glBindVertexArray(quadVAO);
-	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, colorBuffer);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 Shader* Draw::getShader(const std::string& vp, const std::string& fp) {
@@ -458,20 +483,48 @@ void Draw::render() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenColorBuffer, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	static unsigned int rbo = 0;
 	if (rbo == 0) {
 		glGenRenderbuffers(1, &rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 	}
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	static unsigned int msFramebuffer = 0;
+	if (msFramebuffer == 0) {
+		glGenFramebuffers(1, &msFramebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, msFramebuffer);
+	}
+	static unsigned int msScreenColorBuffer = 0;
+	if (msScreenColorBuffer == 0) {
+		glGenTextures(1, &msScreenColorBuffer);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msScreenColorBuffer);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, RenderState::samplesNum, GL_RGB, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT, GL_TRUE);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, msScreenColorBuffer, 0);
+	}
+	static unsigned int msRbo = 0;
+	if (msRbo == 0) {
+		glGenRenderbuffers(1, &msRbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, msRbo);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, RenderState::samplesNum, GL_DEPTH24_STENCIL8, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, msRbo);
+	}
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
-	RenderState::enableFramebuffer ? glBindFramebuffer(GL_FRAMEBUFFER, framebuffer) : glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (RenderState::enableFramebuffer) glBindFramebuffer(GL_FRAMEBUFFER, RenderState::enableMSAA ? msFramebuffer : framebuffer);
+	else glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -482,7 +535,9 @@ void Draw::render() {
 	instancingRock(oPlanet);
 
 	if (RenderState::enableSkybox) drawSkybox();
-	if (RenderState::enableFramebuffer) drawQuad(screenColorBuffer);
+	if (RenderState::enableFramebuffer) drawQuad(
+		RenderState::enableMSAA ? msFramebuffer : framebuffer,
+		RenderState::enableMSAA ? msScreenColorBuffer : screenColorBuffer);
 }
 void Draw::instancingRock(Object planet) {
 	static Model rock("../resources/model/rock/rock.obj");

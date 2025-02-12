@@ -150,6 +150,10 @@ void Gui::update(GLFWwindow* window) {
 			if (ImGui::CollapsingHeader("Post-processing")) {
 				ImGui::Checkbox("Use Framebuffer", &RenderState::enableFramebuffer);
 				ImGui::BeginDisabled(!RenderState::enableFramebuffer);
+				ImGui::Checkbox("MSAA", &RenderState::enableMSAA);
+				ImGui::RadioButton("4##MSAA", &RenderState::samplesNum, 4); ImGui::SameLine();
+				ImGui::RadioButton("8##MSAA", &RenderState::samplesNum, 8); ImGui::SameLine();
+				ImGui::RadioButton("12##MSAA", &RenderState::samplesNum, 12);
 				ImGui::RadioButton("None", &RenderState::PostProcessingCounter, -1); ImGui::SameLine();
 				ImGui::RadioButton("Inversion", &RenderState::PostProcessingCounter, RenderState::INVERSION); ImGui::SameLine();
 				ImGui::RadioButton("Grayscale", &RenderState::PostProcessingCounter, RenderState::GRASCALE);

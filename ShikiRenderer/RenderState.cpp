@@ -22,7 +22,9 @@ bool		RenderState::enableFramebuffer		= true;
 int			RenderState::PostProcessingCounter	= -1;
 bool		RenderState::enablePostProcessing	= false;
 bool		RenderState::enableSkybox			= true;
-bool		RenderState::enableGeometryShader = false;
+bool		RenderState::enableGeometryShader	= false;
+bool		RenderState::enableMSAA				= true;
+int			RenderState::samplesNum				= 4;
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());
