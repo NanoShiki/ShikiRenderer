@@ -67,10 +67,10 @@ vec3 calcDirLight(vec3 viewDir, vec3 worldNormal){
 	vec3 halfwayVector		= normalize(-DirDirection + viewDir);
 	float diff				= max(dot(worldNormal, -DirDirection), 0.0);
 	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
-	vec3 ambient			= DirLightCol * DirAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
-	vec3 diffuse			= DirLightCol * DirDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 ambient			= DirLightCol * DirAmbientStrength * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
+	vec3 diffuse			= DirLightCol * DirDiffuseStrength * diff * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
 	vec3 specular			= DirLightCol * DirSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
-	return (ambient + diffuse + specular);
+	return pow((ambient + diffuse + specular), vec3(1.0 / 2.2));
 }
 
 vec3 calcPointLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
@@ -78,20 +78,17 @@ vec3 calcPointLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
 	vec3 halfwayVector		= normalize(lightDir + viewDir);
 	float diff				= max(dot(worldNormal, lightDir), 0.0);
 	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
-	float constant			= 1.0;
-	float linear			= 0.09;
-	float quadratic			= 0.032;
 	float distance			= length(PointPosition - worldPos);
-	float attenuation		= 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
+	float attenuation		= 1.0 / (distance * distance); 
 
-	vec3 ambient			= PointLightCol * PointAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
-	vec3 diffuse			= PointLightCol * PointDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 ambient			= PointLightCol * PointAmbientStrength * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
+	vec3 diffuse			= PointLightCol * PointDiffuseStrength * diff * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
 	vec3 specular			= PointLightCol * PointSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
 
 	ambient					*= attenuation;
     diffuse					*= attenuation;
     specular				*= attenuation;
-	return (ambient + diffuse + specular);
+	return pow((ambient + diffuse + specular), vec3(1.0 / 2.2));
 }
 
 vec3 calcSpotLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
@@ -99,23 +96,20 @@ vec3 calcSpotLight(vec3 viewDir, vec3 worldNormal, vec3 worldPos){
 	vec3 halfwayVector		= normalize(lightDir + viewDir);
 	float diff				= max(dot(worldNormal, lightDir), 0.0);
 	float spec				= pow(max(dot(worldNormal, halfwayVector), 0.0), material.specularPow);
-	float constant			= 1.0;
-	float linear			= 0.09;
-	float quadratic			= 0.032;
-	float distance			= length(SpotPosition - worldPos);
-	float attenuation		= 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
+	float distance			= length(PointPosition - worldPos);
+	float attenuation		= 1.0 / (distance * distance); 
 
 	float theta				= dot(lightDir, normalize(-SpotDirection));
 	float epsilon			= SpotCutOff - SpotOuterCutOff;
 	float intensity			= clamp((theta - SpotOuterCutOff) / epsilon, 0.0, 1.0);
 
-	vec3 ambient			= SpotLightCol * SpotAmbientStrength * texture(material.texture_diffuse1, texCoord).rgb;
-	vec3 diffuse			= SpotLightCol * SpotDiffuseStrength * diff * texture(material.texture_diffuse1, texCoord).rgb;
+	vec3 ambient			= SpotLightCol * SpotAmbientStrength * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
+	vec3 diffuse			= SpotLightCol * SpotDiffuseStrength * diff * pow(texture(material.texture_diffuse1, texCoord).rgb, vec3(2.2));
 	vec3 specular			= SpotLightCol * SpotSpecularStrength * spec * texture(material.texture_specular1, texCoord).rgb;
 
 	ambient					*= attenuation * intensity;
     diffuse					*= attenuation * intensity;
     specular				*= attenuation * intensity;
 
-	return (ambient + diffuse + specular);
+	return pow((ambient + diffuse + specular), vec3(1.0 / 2.2));
 }
