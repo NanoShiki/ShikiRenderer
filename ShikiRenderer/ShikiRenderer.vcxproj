@@ -194,13 +194,22 @@
     <None Include="..\shader\planet\planet.vs" />
     <None Include="..\shader\plane\plane.fs" />
     <None Include="..\shader\plane\plane.vs" />
+    <None Include="..\shader\red_ball\red_ball.fs" />
+    <None Include="..\shader\red_ball\red_ball.gs" />
+    <None Include="..\shader\red_ball\red_ball.vs" />
     <None Include="..\shader\rock\rock.fs" />
     <None Include="..\shader\rock\rock.vs" />
     <None Include="..\shader\skybox\skybox.fs" />
     <None Include="..\shader\skybox\skybox.vs" />
+    <None Include="..\shader\table\table.fs" />
+    <None Include="..\shader\table\table.gs" />
+    <None Include="..\shader\table\table.vs" />
     <None Include="..\shader\visualizeNormal\visualizeNormal.fs" />
     <None Include="..\shader\visualizeNormal\visualizeNormal.gs" />
     <None Include="..\shader\visualizeNormal\visualizeNormal.vs" />
+    <None Include="..\shader\white_ball\white_ball.fs" />
+    <None Include="..\shader\white_ball\white_ball.gs" />
+    <None Include="..\shader\white_ball\white_ball.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

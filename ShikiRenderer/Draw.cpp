@@ -184,6 +184,33 @@ void Draw::drawModel(Model& model, Object& obj) {
 	model.Draw(*shader);
 	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
 }
+void Draw::drawModel(Model& model, Object& obj, std::string& shaderName) {
+	RenderState::enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	Shader* shader = NULL;
+	if (RenderState::showDepthMap) shader = getShader(
+		"../shader/depthMap/depthMap.vs",
+		"../shader/depthMap/depthMap.fs");
+	else if (RenderState::enableGeometryShader) shader = getShader(
+		"../shader/" + shaderName + "/" + shaderName + ".vs",
+		"../shader/" + shaderName + "/" + shaderName + ".fs",
+		"../shader/" + shaderName + "/" + shaderName + ".gs");
+	else shader = getShader(
+		"../shader/" + shaderName + "/" + shaderName + ".vs",
+		"../shader/" + shaderName + "/" + shaderName + ".fs");
+	setupShader(*shader);
+	glm::mat4 modelMat = glm::mat4(1.0f);
+	modelMat = glm::translate(modelMat, obj.position);
+	modelMat = glm::rotate(modelMat, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMat = glm::scale(modelMat, obj.scale);
+	obj.model = modelMat;
+	shader->setMat4("model", obj.model);
+	if (RenderState::haveColor) shader->setMat3("normalMatrix", getNormalMatrix(obj.model));
+	if (RenderState::enableGeometryShader) shader->setFloat("explosion", obj.explosion);
+	model.Draw(*shader);
+	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
+}
 void Draw::visualizeNormal(Model& model, Object& obj) {
 	Shader* shader = getShader(
 		"../shader/visualizeNormal/visualizeNormal.vs",
@@ -197,6 +224,13 @@ void Draw::visualizeNormal(Model& model, Object& obj) {
 }
 void Draw::drawPlane() {
 	static Object plane("plane");
+	if (!plane.init) {
+		plane.position.y = -5.0f;
+		plane.scale.x = 10.0f;
+		plane.scale.z = 10.0f;
+		plane.init = true;
+	}
+	
 	Shader* shader = NULL;
 	if (RenderState::showDepthMap) shader = getShader(
 		"../shader/depthMap/depthMap.vs",
@@ -449,13 +483,17 @@ void Draw::beforeRender() {
 	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
 
 	RenderState::updateTransform();
+
 }
 void Draw::render() {
 	//用于准备渲染需要使用的变量, 并调用对应函数
 	//backpack data
 	static Object oBackpack("backpack");
 	static Model backpack("../resources/model/backpack/backpack.obj");
-	if (!oBackpack.init) oBackpack.position = glm::vec3(-2.0f, 2.0f, 0.0f); oBackpack.init = true;
+	if (!oBackpack.init) {
+		oBackpack.position = glm::vec3(-4.2f, -3.4f, -15.7f); 
+		oBackpack.init = true;
+	}
 	//planet data
 	static Object oPlanet("planet");
 	static Model planet("../resources/model/planet/planet.obj");
@@ -464,6 +502,85 @@ void Draw::render() {
 		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
 		oPlanet.init = true;
 	}
+	static Object oTable("table");
+	static Model table("../resources/model/table/table.obj");
+	if (!oTable.init) {
+		oTable.position = glm::vec3(0.0f, -5.5f, -5.0f);
+		oTable.scale *= 10.0f;
+		oTable.init = true;
+	}
+	static Object oWhiteBall("white_ball");
+	static Model whiteBall("../resources/model/white_ball/white_ball.obj");
+	if (!oWhiteBall.init) {
+		oWhiteBall.position = glm::vec3(-4.3f, -2.112f, -5.0f);
+		oWhiteBall.scale *= 0.6f;
+		oWhiteBall.init = true;
+	}
+
+	static std::vector<Object*> redBall_list;
+
+	static Model redBall("../resources/model/red_ball/red_ball.obj");
+	static std::string shaderName_of_redBall = "red_ball";
+	static Object oRedBall1("red_ball1");
+	static Object oRedBall2("red_ball2");
+	static Object oRedBall3("red_ball3");
+	static Object oRedBall4("red_ball4");
+	static Object oRedBall5("red_ball5");
+	static Object oRedBall6("red_ball6");
+	static Object oRedBall7("red_ball7");
+	static Object oRedBall8("red_ball8");
+	static Object oRedBall9("red_ball9");
+	static Object oRedBall10("red_ball10");
+	static Object oRedBall11("red_ball11");
+	static Object oRedBall12("red_ball12");
+	static Object oRedBall13("red_ball13");
+	static Object oRedBall14("red_ball14");
+	static Object oRedBall15("red_ball15");
+
+	if (redBall_list.size() == 0) {
+		redBall_list.push_back(&oRedBall1);
+		redBall_list.push_back(&oRedBall2);
+		redBall_list.push_back(&oRedBall3);
+		redBall_list.push_back(&oRedBall4);
+		redBall_list.push_back(&oRedBall5);
+		redBall_list.push_back(&oRedBall6);
+		redBall_list.push_back(&oRedBall7);
+		redBall_list.push_back(&oRedBall8);
+		redBall_list.push_back(&oRedBall9);
+		redBall_list.push_back(&oRedBall10);
+		redBall_list.push_back(&oRedBall11);
+		redBall_list.push_back(&oRedBall12);
+		redBall_list.push_back(&oRedBall13);
+		redBall_list.push_back(&oRedBall14);
+		redBall_list.push_back(&oRedBall15);
+		int count = 0;
+		for (int i = 1; i <= 5; i++) {
+			for (int j = 1; j <= i; j++) {
+				Object* obj = redBall_list[count];
+				++count;
+				obj->scale *= 0.6f;
+				obj->init = true;
+				obj->position = glm::vec3(3.3f, -2.112f, -5.0f);
+				obj->position += glm::vec3(0.35f * (i-1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+				if (i % 2 == 0) {
+					int offset = (j - 1) / 2;
+					glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.35f * (0.5f + offset));
+					if (j % 2 == 0) z_offset *= -1;
+					obj->position += z_offset;
+				}
+				else {
+					if (j == 1) continue;
+					else {
+						int offset = (j - 2) / 2;
+						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.35f * (1 + offset));
+						if ((j - 1) % 2 == 0) z_offset *= -1;
+						obj->position += z_offset;
+					}
+				}
+			}
+		}
+	}
+
 	//-------------
 	static Light dirLight("Directional Light", DIRECTION);
 	static Light PointLight("Point Light", POINT);
@@ -532,6 +649,12 @@ void Draw::render() {
 	drawPlane();
 	drawModel(backpack, oBackpack);
 	drawModel(planet, oPlanet);
+	drawModel(table, oTable);
+	drawModel(whiteBall, oWhiteBall);
+
+	for (auto m : redBall_list) {
+		drawModel(redBall, *m, shaderName_of_redBall);
+	}
 	instancingRock(oPlanet);
 
 	if (RenderState::enableSkybox) drawSkybox();

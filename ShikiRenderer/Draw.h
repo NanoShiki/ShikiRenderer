@@ -22,6 +22,7 @@ public:
 	static unsigned int		loadTexture(const char* path);
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
 	static void				drawModel(Model& model, Object& obj);
+	static void				drawModel(Model& model, Object& obj, std::string& shaderName);
 	static void				visualizeNormal(Model& model, Object& obj);
 	static void				drawPlane();
 	static void				setupShader(Shader& shader);

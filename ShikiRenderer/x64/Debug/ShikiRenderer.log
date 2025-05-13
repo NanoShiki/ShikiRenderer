@@ -1,12 +1,12 @@
 ﻿  Draw.cpp
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\RenderState.h(13,14): warning C4091: 'static ': ignored on left of 'RenderState::PostProcessing' when no variable is declared
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\RenderState.h(13,81): warning C4091: 'static ': ignored on left of 'RenderState::PostProcessing' when no variable is declared
   (compiling source file 'Draw.cpp')
   
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.h(19,17): warning C4091: 'static ': ignored on left of 'Draw::skyboxType' when no variable is declared
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.h(19,40): warning C4091: 'static ': ignored on left of 'Draw::skyboxType' when no variable is declared
   (compiling source file 'Draw.cpp')
   
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(551,20): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(555,30): warning C4018: '<': signed/unsigned mismatch
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(569,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(571,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(674,20): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(678,30): warning C4018: '<': signed/unsigned mismatch
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(692,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\A_myLearning\ShikiRenderer\ShikiRenderer\Draw.cpp(694,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   ShikiRenderer.vcxproj -> D:\A_myLearning\ShikiRenderer\x64\Debug\ShikiRenderer.exe

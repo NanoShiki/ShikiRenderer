@@ -43,6 +43,15 @@
     <Filter Include="Shader\rock">
       <UniqueIdentifier>{d7eaa577-b82f-4f27-9402-d3011657a2c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\table">
+      <UniqueIdentifier>{01eff9b1-562d-4cf3-96ef-1effa900005c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\white_ball">
+      <UniqueIdentifier>{2fcdb1d7-aa2a-44e0-9164-3f0830779374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\red_ball">
+      <UniqueIdentifier>{286b2098-363d-4d52-a9e7-b4d0a42b2564}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -243,6 +252,33 @@
     </None>
     <None Include="..\shader\rock\rock.vs">
       <Filter>Shader\rock</Filter>
+    </None>
+    <None Include="..\shader\table\table.fs">
+      <Filter>Shader\table</Filter>
+    </None>
+    <None Include="..\shader\table\table.gs">
+      <Filter>Shader\table</Filter>
+    </None>
+    <None Include="..\shader\table\table.vs">
+      <Filter>Shader\table</Filter>
+    </None>
+    <None Include="..\shader\white_ball\white_ball.fs">
+      <Filter>Shader\white_ball</Filter>
+    </None>
+    <None Include="..\shader\white_ball\white_ball.gs">
+      <Filter>Shader\white_ball</Filter>
+    </None>
+    <None Include="..\shader\white_ball\white_ball.vs">
+      <Filter>Shader\white_ball</Filter>
+    </None>
+    <None Include="..\shader\red_ball\red_ball.fs">
+      <Filter>Shader\red_ball</Filter>
+    </None>
+    <None Include="..\shader\red_ball\red_ball.gs">
+      <Filter>Shader\red_ball</Filter>
+    </None>
+    <None Include="..\shader\red_ball\red_ball.vs">
+      <Filter>Shader\red_ball</Filter>
     </None>
   </ItemGroup>
 </Project>
