@@ -114,6 +114,12 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TennisTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tennis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auto.h">
@@ -177,6 +183,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tennis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TennisTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

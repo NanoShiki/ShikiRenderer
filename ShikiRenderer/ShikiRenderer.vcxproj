@@ -151,6 +151,8 @@
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="Tennis.cpp" />
+    <ClCompile Include="TennisTable.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +176,8 @@
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Tennis.h" />
+    <ClInclude Include="TennisTable.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

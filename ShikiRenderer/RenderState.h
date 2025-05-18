@@ -35,6 +35,8 @@ public:
 	static bool			enableGeometryShader;
 	static bool			enableMSAA;
 	static int			samplesNum;
+	static bool			startGame;
+	static bool			playTheGame;
 
 	static void updateFrame();					//更新deltaTime和lastTime
 	static void updateTransform();				//更新变换矩阵(观察和投影)

@@ -10,6 +10,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Object.h"
 #include "Model.h"
+#include "Tennis.h"
+#include "TennisTable.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -23,6 +25,7 @@ public:
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
 	static void				drawModel(Model& model, Object& obj);
 	static void				drawModel(Model& model, Object& obj, std::string& shaderName);
+	static void				drawAllModel();
 	static void				visualizeNormal(Model& model, Object& obj);
 	static void				drawPlane();
 	static void				setupShader(Shader& shader);

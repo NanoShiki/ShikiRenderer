@@ -25,6 +25,9 @@ bool		RenderState::enableSkybox			= true;
 bool		RenderState::enableGeometryShader	= false;
 bool		RenderState::enableMSAA				= true;
 int			RenderState::samplesNum				= 4;
+bool		RenderState::startGame				= false;
+bool		RenderState::playTheGame			= false;
+
 
 void RenderState::updateFrame() {
 	float currentFrame = static_cast<float>(glfwGetTime());

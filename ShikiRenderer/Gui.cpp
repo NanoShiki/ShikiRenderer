@@ -164,6 +164,11 @@ void Gui::update(GLFWwindow* window) {
 				else RenderState::enablePostProcessing = true;
 				ImGui::EndDisabled();
 			}
+			if (ImGui::CollapsingHeader("Game Configuration")) {
+				ImGui::Checkbox("play the game", &RenderState::playTheGame);
+				ImGui::DragFloat("start speed", &Tennis::start_speed, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("u", &TennisTable::u, 0.00001f, 0.0f, 0.1f, "%.5f");
+			}
 		}
 		ImGui::End();
 	}
@@ -171,11 +176,13 @@ void Gui::update(GLFWwindow* window) {
 		if (!RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			RenderState::inCameraMode = true;
+			RenderState::startGame = true;
 			show_all_window = false;
 		}
 		else if (RenderState::inCameraMode && ImGui::IsKeyPressed(ImGuiKey_C)) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			RenderState::inCameraMode = false;
+			RenderState::startGame = false;
 			show_all_window = true;
 		}
 	}

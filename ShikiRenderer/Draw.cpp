@@ -211,6 +211,231 @@ void Draw::drawModel(Model& model, Object& obj, std::string& shaderName) {
 	model.Draw(*shader);
 	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
 }
+void Draw::drawAllModel() {
+	//backpack data
+	static Object oBackpack("backpack");
+	static Model backpack("../resources/model/backpack/backpack.obj");
+	if (!oBackpack.init) {
+		oBackpack.position = glm::vec3(-4.2f, -3.4f, -15.7f);
+		oBackpack.init = true;
+	}
+	//planet data
+	static Object oPlanet("planet");
+	static Model planet("../resources/model/planet/planet.obj");
+	if (!oPlanet.init) {
+		oPlanet.position = glm::vec3(10.0f, 30.0f, -50.0f);
+		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
+		oPlanet.init = true;
+	}
+
+	//Tennis table
+	static Object oTable("table");
+	static Model table("../resources/model/table/table.obj");
+	if (!oTable.init) {
+		oTable.position = glm::vec3(0.0f, -5.5f, -5.0f);
+		oTable.scale *= 10.0f;
+		oTable.init = true;
+	}
+	static TennisTable tennisTable(oTable.position);
+
+	const float TABLE_PLANE = -2.112f;
+
+	//Tennis
+	static Object oWhiteBall("white_ball");
+	static Model mWhiteBall("../resources/model/white_ball/white_ball.obj");
+	static Tennis whiteBall(oWhiteBall.position);
+	
+	if (!oWhiteBall.init) {
+		oWhiteBall.position = glm::vec3(-4.3f, TABLE_PLANE, -5.0f);
+		oWhiteBall.scale *= 0.6f;
+		oWhiteBall.init = true;
+	}
+
+	static std::vector<Object*> redBall_object_list;
+
+	static Model redBall("../resources/model/red_ball/red_ball.obj");
+	static std::string shaderName_of_redBall = "red_ball";
+	static Object oRedBall1("red_ball1");
+	static Object oRedBall2("red_ball2");
+	static Object oRedBall3("red_ball3");
+	static Object oRedBall4("red_ball4");
+	static Object oRedBall5("red_ball5");
+	static Object oRedBall6("red_ball6");
+	static Object oRedBall7("red_ball7");
+	static Object oRedBall8("red_ball8");
+	static Object oRedBall9("red_ball9");
+	static Object oRedBall10("red_ball10");
+	static Object oRedBall11("red_ball11");
+	static Object oRedBall12("red_ball12");
+	static Object oRedBall13("red_ball13");
+	static Object oRedBall14("red_ball14");
+	static Object oRedBall15("red_ball15");
+
+	static std::vector<Tennis> redBalls;
+
+	if (redBall_object_list.size() == 0) {
+		redBall_object_list.push_back(&oRedBall1);
+		redBall_object_list.push_back(&oRedBall2);
+		redBall_object_list.push_back(&oRedBall3);
+		redBall_object_list.push_back(&oRedBall4);
+		redBall_object_list.push_back(&oRedBall5);
+		redBall_object_list.push_back(&oRedBall6);
+		redBall_object_list.push_back(&oRedBall7);
+		redBall_object_list.push_back(&oRedBall8);
+		redBall_object_list.push_back(&oRedBall9);
+		redBall_object_list.push_back(&oRedBall10);
+		redBall_object_list.push_back(&oRedBall11);
+		redBall_object_list.push_back(&oRedBall12);
+		redBall_object_list.push_back(&oRedBall13);
+		redBall_object_list.push_back(&oRedBall14);
+		redBall_object_list.push_back(&oRedBall15);
+		int count = 0;
+		for (int i = 1; i <= 5; i++) {
+			for (int j = 1; j <= i; j++) {
+				Object* obj = redBall_object_list[count];
+				++count;
+				obj->scale *= 0.6f;
+				obj->init = true;
+				obj->position = glm::vec3(3.3f, TABLE_PLANE, -5.0f);
+				obj->position += glm::vec3(0.5f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+				if (i % 2 == 0) {
+					int offset = (j - 1) / 2;
+					glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (0.5f + offset));
+					if (j % 2 == 0) z_offset *= -1;
+					obj->position += z_offset;
+				}
+				else {
+					if (j == 1) continue;
+					else {
+						int offset = (j - 2) / 2;
+						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (1 + offset));
+						if ((j - 1) % 2 == 0) z_offset *= -1;
+						obj->position += z_offset;
+					}
+				}
+			}
+		}
+	}
+
+	if (redBalls.size() == 0) {
+		for (auto o : redBall_object_list) {
+			redBalls.push_back(Tennis(o->position));
+		}
+	}
+
+	drawPlane();
+	drawModel(backpack, oBackpack);
+	drawModel(planet, oPlanet);
+	drawModel(table, oTable);
+
+	static float coeff = TennisTable::u * whiteBall.getM() * 9.8f;
+	static bool gameInit = false, reset = false;
+	if (RenderState::playTheGame && RenderState::startGame) {
+		if (!gameInit) {
+			//初始化白球
+			gameInit = true;
+			reset = false;
+			whiteBall.v = glm::vec3(Tennis::start_speed, 0.0f, 0.0f);
+		}
+
+		//球碰撞
+		for (int i = 0; i < redBall_object_list.size(); i++) {
+			whiteBall.collision_and_update(redBalls[i]);
+			for (int j = i + 1; j < redBall_object_list.size(); j++) {
+				redBalls[i].collision_and_update(redBalls[j]);
+			}
+		}
+
+		//与桌面碰撞
+		if (glm::length(whiteBall.v) != 0.0f) tennisTable.updateTennis(whiteBall);
+		for (int i = 0; i < redBalls.size(); i++) {
+			if (glm::length(redBalls[i].v) != 0.0f) tennisTable.updateTennis(redBalls[i]);
+		}
+
+		//更新白球位置, 速度和加速度
+		whiteBall.position += whiteBall.v * RenderState::deltaTime;
+		oWhiteBall.position = whiteBall.position;
+		if (glm::length(whiteBall.v) < 0.01f + glm::length(whiteBall.a)) {
+			whiteBall.v = glm::vec3(0.0f);
+			whiteBall.a = glm::vec3(0.0f);
+		}
+		else {
+			whiteBall.a = -glm::normalize(whiteBall.v) * coeff;
+			whiteBall.v += whiteBall.a * RenderState::deltaTime;
+		}
+		
+		//更新红球位置, 速度和加速度
+		for (int i = 0; i < redBalls.size(); i++) {
+			Tennis& rb = redBalls[i];
+			
+			rb.position += rb.v * RenderState::deltaTime;
+			redBall_object_list[i]->position = rb.position;
+
+			if (glm::length(rb.v) < 0.01f + glm::length(rb.a)) {
+				rb.v = glm::vec3(0.0f);
+				rb.a = glm::vec3(0.0f);
+			}
+			else {
+				rb.a = -glm::normalize(rb.v) * coeff;
+				rb.v += rb.a * RenderState::deltaTime;
+			}
+		}
+		
+	}
+	else {
+		if (!reset) {
+			reset = true;
+			gameInit = false;
+
+			//再次初始化白球
+			oWhiteBall.position = glm::vec3(-4.3f, TABLE_PLANE, -5.0f);
+			whiteBall.v = glm::vec3(0.0f);
+			whiteBall.a = glm::vec3(0.0f);
+			whiteBall.position = oWhiteBall.position;
+			
+			//再次初始化红球
+			int count = 0;
+			for (int i = 1; i <= 5; i++) {
+				for (int j = 1; j <= i; j++) {
+					Object* obj = redBall_object_list[count];
+					++count;
+					obj->scale = glm::vec3(0.6f);
+					obj->init = true;
+					obj->position = glm::vec3(3.3f, TABLE_PLANE, -5.0f);
+					obj->position += glm::vec3(0.5f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+					if (i % 2 == 0) {
+						int offset = (j - 1) / 2;
+						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (0.5f + offset));
+						if (j % 2 == 0) z_offset *= -1;
+						obj->position += z_offset;
+					}
+					else {
+						if (j == 1) continue;
+						else {
+							int offset = (j - 2) / 2;
+							glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (1 + offset));
+							if ((j - 1) % 2 == 0) z_offset *= -1;
+							obj->position += z_offset;
+						}
+					}
+				}
+			}
+			for (int i = 0; i < redBalls.size(); i++) {
+				redBalls[i].v = glm::vec3(0.0f);
+				redBalls[i].a = glm::vec3(0.0f);
+				redBalls[i].position = redBall_object_list[i]->position;
+			}
+		}
+
+	}
+	
+	drawModel(mWhiteBall, oWhiteBall);
+	for (auto m : redBall_object_list) {
+		drawModel(redBall, *m, shaderName_of_redBall);
+	}
+
+	instancingRock(oPlanet);
+}
 void Draw::visualizeNormal(Model& model, Object& obj) {
 	Shader* shader = getShader(
 		"../shader/visualizeNormal/visualizeNormal.vs",
@@ -487,100 +712,6 @@ void Draw::beforeRender() {
 }
 void Draw::render() {
 	//用于准备渲染需要使用的变量, 并调用对应函数
-	//backpack data
-	static Object oBackpack("backpack");
-	static Model backpack("../resources/model/backpack/backpack.obj");
-	if (!oBackpack.init) {
-		oBackpack.position = glm::vec3(-4.2f, -3.4f, -15.7f); 
-		oBackpack.init = true;
-	}
-	//planet data
-	static Object oPlanet("planet");
-	static Model planet("../resources/model/planet/planet.obj");
-	if (!oPlanet.init) {
-		oPlanet.position = glm::vec3(10.0f, 30.0f, -50.0f);
-		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
-		oPlanet.init = true;
-	}
-	static Object oTable("table");
-	static Model table("../resources/model/table/table.obj");
-	if (!oTable.init) {
-		oTable.position = glm::vec3(0.0f, -5.5f, -5.0f);
-		oTable.scale *= 10.0f;
-		oTable.init = true;
-	}
-	static Object oWhiteBall("white_ball");
-	static Model whiteBall("../resources/model/white_ball/white_ball.obj");
-	if (!oWhiteBall.init) {
-		oWhiteBall.position = glm::vec3(-4.3f, -2.112f, -5.0f);
-		oWhiteBall.scale *= 0.6f;
-		oWhiteBall.init = true;
-	}
-
-	static std::vector<Object*> redBall_list;
-
-	static Model redBall("../resources/model/red_ball/red_ball.obj");
-	static std::string shaderName_of_redBall = "red_ball";
-	static Object oRedBall1("red_ball1");
-	static Object oRedBall2("red_ball2");
-	static Object oRedBall3("red_ball3");
-	static Object oRedBall4("red_ball4");
-	static Object oRedBall5("red_ball5");
-	static Object oRedBall6("red_ball6");
-	static Object oRedBall7("red_ball7");
-	static Object oRedBall8("red_ball8");
-	static Object oRedBall9("red_ball9");
-	static Object oRedBall10("red_ball10");
-	static Object oRedBall11("red_ball11");
-	static Object oRedBall12("red_ball12");
-	static Object oRedBall13("red_ball13");
-	static Object oRedBall14("red_ball14");
-	static Object oRedBall15("red_ball15");
-
-	if (redBall_list.size() == 0) {
-		redBall_list.push_back(&oRedBall1);
-		redBall_list.push_back(&oRedBall2);
-		redBall_list.push_back(&oRedBall3);
-		redBall_list.push_back(&oRedBall4);
-		redBall_list.push_back(&oRedBall5);
-		redBall_list.push_back(&oRedBall6);
-		redBall_list.push_back(&oRedBall7);
-		redBall_list.push_back(&oRedBall8);
-		redBall_list.push_back(&oRedBall9);
-		redBall_list.push_back(&oRedBall10);
-		redBall_list.push_back(&oRedBall11);
-		redBall_list.push_back(&oRedBall12);
-		redBall_list.push_back(&oRedBall13);
-		redBall_list.push_back(&oRedBall14);
-		redBall_list.push_back(&oRedBall15);
-		int count = 0;
-		for (int i = 1; i <= 5; i++) {
-			for (int j = 1; j <= i; j++) {
-				Object* obj = redBall_list[count];
-				++count;
-				obj->scale *= 0.6f;
-				obj->init = true;
-				obj->position = glm::vec3(3.3f, -2.112f, -5.0f);
-				obj->position += glm::vec3(0.35f * (i-1) * std::sqrt(3) / 2, 0.0f, 0.0f);
-				if (i % 2 == 0) {
-					int offset = (j - 1) / 2;
-					glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.35f * (0.5f + offset));
-					if (j % 2 == 0) z_offset *= -1;
-					obj->position += z_offset;
-				}
-				else {
-					if (j == 1) continue;
-					else {
-						int offset = (j - 2) / 2;
-						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.35f * (1 + offset));
-						if ((j - 1) % 2 == 0) z_offset *= -1;
-						obj->position += z_offset;
-					}
-				}
-			}
-		}
-	}
-
 	//-------------
 	static Light dirLight("Directional Light", DIRECTION);
 	static Light PointLight("Point Light", POINT);
@@ -646,16 +777,7 @@ void Draw::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	updateUniform();
-	drawPlane();
-	drawModel(backpack, oBackpack);
-	drawModel(planet, oPlanet);
-	drawModel(table, oTable);
-	drawModel(whiteBall, oWhiteBall);
-
-	for (auto m : redBall_list) {
-		drawModel(redBall, *m, shaderName_of_redBall);
-	}
-	instancingRock(oPlanet);
+	drawAllModel();
 
 	if (RenderState::enableSkybox) drawSkybox();
 	if (RenderState::enableFramebuffer) drawQuad(
