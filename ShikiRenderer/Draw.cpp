@@ -898,8 +898,6 @@ void Draw::render() {
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	shadowMap = getShadowMap();
-
 	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
 	if (RenderState::enableFramebuffer) glBindFramebuffer(GL_FRAMEBUFFER, RenderState::enableMSAA ? msFramebuffer : framebuffer);
 	else glBindFramebuffer(GL_FRAMEBUFFER, 0);
