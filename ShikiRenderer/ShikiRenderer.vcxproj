@@ -186,6 +186,8 @@
     <None Include="..\shader\backpack\backpack.vs" />
     <None Include="..\shader\depthMap\depthMap.fs" />
     <None Include="..\shader\depthMap\depthMap.vs" />
+    <None Include="..\shader\dirShadow\shadowMap.fs" />
+    <None Include="..\shader\dirShadow\shadowMap.vs" />
     <None Include="..\shader\framebuffer\framebuffer.fs" />
     <None Include="..\shader\framebuffer\framebuffer.vs" />
     <None Include="..\shader\framebuffer\framebuffer_blur.fs" />

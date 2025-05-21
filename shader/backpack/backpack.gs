@@ -6,12 +6,14 @@ in VS_OUT {
     vec2 texCoord;
 	vec3 worldPos;
 	vec3 normal;
+    vec4 fragPosLightSpace; 
 } gs_in[];
 
 out GS_OUT{
     vec2 texCoord;
 	vec3 worldPos;
 	vec3 normal;
+    vec4 fragPosLightSpace;
 } gs_out;
 
 uniform float explosion;
@@ -48,18 +50,21 @@ void main() {
     gl_Position = explode(gl_in[0].gl_Position, normal);
     gs_out.texCoord = gs_in[0].texCoord;
     gs_out.normal = gs_in[0].normal;
+    gs_out.fragPosLightSpace = gs_in[0].fragPosLightSpace;
     gs_out.worldPos = explode(gs_in[0].worldPos, worldNormal);
     EmitVertex();
 
     gl_Position = explode(gl_in[1].gl_Position, normal);
     gs_out.texCoord = gs_in[1].texCoord;
     gs_out.normal = gs_in[1].normal;
+    gs_out.fragPosLightSpace = gs_in[1].fragPosLightSpace;
     gs_out.worldPos = explode(gs_in[1].worldPos, worldNormal);
     EmitVertex();
 
     gl_Position = explode(gl_in[2].gl_Position, normal);
     gs_out.texCoord = gs_in[2].texCoord;
     gs_out.normal = gs_in[2].normal;
+    gs_out.fragPosLightSpace = gs_in[1].fragPosLightSpace;
     gs_out.worldPos = explode(gs_in[2].worldPos, worldNormal);
     EmitVertex();
     EndPrimitive();

@@ -47,11 +47,11 @@ void Gui::update(GLFWwindow* window) {
 						ImGui::Checkbox(("Open##" + light->name).c_str(), &light->open);
 						ImGui::PushItemWidth(200.0f);
 						ImGui::Text("Configure:");
-						ImGui::DragFloat3(("Direction##" + light->name).c_str(), &light->direction[0], 0.1f, -3.0f, 3.0f);
-						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.05f, 0.0f, 1.0f);
+						ImGui::DragFloat3(("Direction##" + light->name).c_str(), &light->direction[0], 0.001f, -1.0f, 1.0f);
+						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.001f, 0.0f, 1.0f);
 						ImGui::PopItemWidth();
 						ImGui::TreePop();
 					}
@@ -63,11 +63,11 @@ void Gui::update(GLFWwindow* window) {
 						ImGui::Checkbox(("Open##" + light->name).c_str(), &light->open);
 						ImGui::PushItemWidth(200.0f);
 						ImGui::Text("Configure:");
-						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Cut Off##" + light->name).c_str(), &light->cutoff, 1.0f, 5.0f, 60.0f);
+						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Cut Off##" + light->name).c_str(), &light->cutoff, 0.001f, 5.0f, 60.0f);
 						ImGui::PopItemWidth();
 						ImGui::TreePop();
 					}
@@ -77,11 +77,11 @@ void Gui::update(GLFWwindow* window) {
 						ImGui::Checkbox(("Open##" + light->name).c_str(), &light->open);
 						ImGui::PushItemWidth(200.0f);
 						ImGui::Text("Configure:");
-						ImGui::DragFloat3(("Position##" + light->name).c_str(), &light->position[0], 0.1f, -3.0f, 3.0f);
-						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.05f, 0.0f, 1.0f);
-						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.05f, 0.0f, 1.0f);
+						ImGui::DragFloat3(("Position##" + light->name).c_str(), &light->position[0], 0.001f, -3.0f, 3.0f);
+						ImGui::DragFloat3(("Color##" + light->name).c_str(), &light->color[0], 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Ambient Strength##" + light->name).c_str(), &light->ambientStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Specular Strength##" + light->name).c_str(), &light->specularStrength, 0.001f, 0.0f, 1.0f);
+						ImGui::DragFloat(("Diffuse Strength##" + light->name).c_str(), &light->diffuseStrength, 0.001f, 0.0f, 1.0f);
 						ImGui::PopItemWidth();
 						ImGui::TreePop();
 					}
@@ -96,10 +96,10 @@ void Gui::update(GLFWwindow* window) {
 					ImGui::SliderAngle(("Roll(z-axis)##" + object->name).c_str(), &object->rotation[2], -180.0f, 180.0f);
 					ImGui::PopItemWidth();
 					ImGui::Separator();
-					ImGui::DragFloat3(("Transform##" + object->name).c_str(), &object->position[0], 0.01f, -100.0f, 100.0f);
-					ImGui::DragFloat3(("Scale##" + object->name).c_str(), &object->scale[0], 0.1f, 0.0f, 20.0f);
+					ImGui::DragFloat3(("Transform##" + object->name).c_str(), &object->position[0], 0.001f, -100.0f, 100.0f);
+					ImGui::DragFloat3(("Scale##" + object->name).c_str(), &object->scale[0], 0.001f, 0.0f, 20.0f);
 					if (RenderState::enableGeometryShader && object->name != "plane") {
-						ImGui::DragFloat(("Explosion##" + object->name).c_str(), &object->explosion, 0.1f, 0.0f, 5.0f);
+						ImGui::DragFloat(("Explosion##" + object->name).c_str(), &object->explosion, 0.001f, 0.0f, 5.0f);
 						ImGui::Checkbox(("Visualize Normal##" + object->name).c_str(), &object->visualizeNormal);
 						if (object->visualizeNormal) object->explosion = 0.0f;
 					}
@@ -166,7 +166,7 @@ void Gui::update(GLFWwindow* window) {
 			}
 			if (ImGui::CollapsingHeader("Game Configuration")) {
 				ImGui::Checkbox("play the game", &RenderState::playTheGame);
-				ImGui::DragFloat("start speed", &Tennis::start_speed, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("start speed", &Tennis::start_speed, 0.01f, 0.0f, 15.0f);
 				ImGui::DragFloat("u", &TennisTable::u, 0.00001f, 0.0f, 0.1f, "%.5f");
 			}
 		}

@@ -12,8 +12,9 @@ Light::Light(std::string name, LightType lightType,
 	specularStrength(sS)
 {
 	if (lightType == DIRECTION) {
-		open = true;
-		direction = glm::vec3(-0.5f, -0.2f, -1.0f);
+		open = true;	
+		direction = glm::normalize(glm::vec3(-1.0f, -1.0f, -1.0f));
+		position = (glm::vec3(0.0f) - direction) * 30.0f;
 	}
 	else if (lightType == POINT) {
 		open = false;

@@ -2,6 +2,8 @@
 
 int				Draw::skyboxType			= 0;
 int				Draw::rockAmount			= 1000;
+static Object plane("plane");
+static unsigned int shadowMap = 0;
 
 unsigned int Draw::loadTexture(const char* path)
 {
@@ -131,6 +133,8 @@ void Draw::updateUniform() {
 	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &Light::allLights[2]->diffuseStrength);
 	glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &cutoff);
 	glBufferSubData(GL_UNIFORM_BUFFER, 20, 4, &outerCutoff);
+	Light::allLights[2]->position = RenderState::camera.Position;
+	Light::allLights[2]->direction = RenderState::camera.Front;
 	glBufferSubData(GL_UNIFORM_BUFFER, 32, 16, &Light::allLights[2]->position);
 	glBufferSubData(GL_UNIFORM_BUFFER, 48, 16, &Light::allLights[2]->direction);
 	glBufferSubData(GL_UNIFORM_BUFFER, 64, 16, &Light::allLights[2]->color);
@@ -181,6 +185,11 @@ void Draw::drawModel(Model& model, Object& obj) {
 	shader->setMat4("model", obj.model);
 	if (RenderState::haveColor) shader->setMat3("normalMatrix", getNormalMatrix(obj.model));
 	if (RenderState::enableGeometryShader) shader->setFloat("explosion", obj.explosion);
+	
+	glActiveTexture(GL_TEXTURE0 + model.textures_loaded.size());
+	shader->setInt("shadowMap", model.textures_loaded.size());
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
+	
 	model.Draw(*shader);
 	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
 }
@@ -211,7 +220,19 @@ void Draw::drawModel(Model& model, Object& obj, std::string& shaderName) {
 	model.Draw(*shader);
 	if (RenderState::enableGeometryShader && obj.visualizeNormal) visualizeNormal(model, obj);
 }
-void Draw::drawAllModel() {
+void Draw::drawModel(Model& model, Object& obj, Shader* shader) {
+	shader->use();
+	glm::mat4 modelMat = glm::mat4(1.0f);
+	modelMat = glm::translate(modelMat, obj.position);
+	modelMat = glm::rotate(modelMat, obj.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, obj.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMat = glm::scale(modelMat, obj.scale);
+	obj.model = modelMat;
+	shader->setMat4("model", obj.model);
+	model.Draw(*shader);
+}
+void Draw::drawAllModel(Shader* shader) {
 	//backpack data
 	static Object oBackpack("backpack");
 	static Model backpack("../resources/model/backpack/backpack.obj");
@@ -223,7 +244,7 @@ void Draw::drawAllModel() {
 	static Object oPlanet("planet");
 	static Model planet("../resources/model/planet/planet.obj");
 	if (!oPlanet.init) {
-		oPlanet.position = glm::vec3(10.0f, 30.0f, -50.0f);
+		oPlanet.position = glm::vec3(10.0f, 20.0f, -80.0f);
 		oPlanet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
 		oPlanet.init = true;
 	}
@@ -297,10 +318,10 @@ void Draw::drawAllModel() {
 				obj->scale *= 0.6f;
 				obj->init = true;
 				obj->position = glm::vec3(3.3f, TABLE_PLANE, -5.0f);
-				obj->position += glm::vec3(0.5f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+				obj->position += glm::vec3(0.3f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
 				if (i % 2 == 0) {
 					int offset = (j - 1) / 2;
-					glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (0.5f + offset));
+					glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.3f * (0.5f + offset));
 					if (j % 2 == 0) z_offset *= -1;
 					obj->position += z_offset;
 				}
@@ -308,7 +329,7 @@ void Draw::drawAllModel() {
 					if (j == 1) continue;
 					else {
 						int offset = (j - 2) / 2;
-						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (1 + offset));
+						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.3f * (1 + offset));
 						if ((j - 1) % 2 == 0) z_offset *= -1;
 						obj->position += z_offset;
 					}
@@ -323,19 +344,21 @@ void Draw::drawAllModel() {
 		}
 	}
 
-	drawPlane();
-	drawModel(backpack, oBackpack);
-	drawModel(planet, oPlanet);
-	drawModel(table, oTable);
+	//初始化参数
+	static float f1 = TennisTable::u * whiteBall.getM() * 9.8f;
+	static float C = 0.42f;
+	static float p = 1.225f;
+	static float A = 3.1415f * whiteBall.getRadius() * whiteBall.getRadius();
 
-	static float coeff = TennisTable::u * whiteBall.getM() * 9.8f;
 	static bool gameInit = false, reset = false;
+
 	if (RenderState::playTheGame && RenderState::startGame) {
 		if (!gameInit) {
 			//初始化白球
 			gameInit = true;
 			reset = false;
 			whiteBall.v = glm::vec3(Tennis::start_speed, 0.0f, 0.0f);
+			whiteBall.w = 0.0f;
 		}
 
 		//球碰撞
@@ -355,32 +378,63 @@ void Draw::drawAllModel() {
 		//更新白球位置, 速度和加速度
 		whiteBall.position += whiteBall.v * RenderState::deltaTime;
 		oWhiteBall.position = whiteBall.position;
+		oWhiteBall.rotation.y += glm::degrees(whiteBall.w * RenderState::deltaTime);
+
 		if (glm::length(whiteBall.v) < 0.01f + glm::length(whiteBall.a)) {
 			whiteBall.v = glm::vec3(0.0f);
 			whiteBall.a = glm::vec3(0.0f);
 		}
 		else {
-			whiteBall.a = -glm::normalize(whiteBall.v) * coeff;
+			//空气阻力计算
+			float f2 = 1.0f / 2.0f * C * p * A * glm::length(whiteBall.v) * glm::length(whiteBall.v);
+
+			whiteBall.a = -glm::normalize(whiteBall.v) * (f1 + f2) / whiteBall.getM();
 			whiteBall.v += whiteBall.a * RenderState::deltaTime;
 		}
-		
+		//简化: 角速度固定衰减
+		if (whiteBall.w > 0.01f) {
+			whiteBall.w -= 0.1f * RenderState::deltaTime;
+		}
+		else if (whiteBall.w < -0.01f) {
+			whiteBall.w += 0.1f * RenderState::deltaTime;
+		}
+		else {
+			whiteBall.w = 0.0f;
+		}
+
 		//更新红球位置, 速度和加速度
 		for (int i = 0; i < redBalls.size(); i++) {
 			Tennis& rb = redBalls[i];
-			
+			Object* pRb = redBall_object_list[i];
+
 			rb.position += rb.v * RenderState::deltaTime;
-			redBall_object_list[i]->position = rb.position;
+			pRb->position = rb.position;
+			pRb->rotation.y += glm::degrees(rb.w * RenderState::deltaTime);
 
 			if (glm::length(rb.v) < 0.01f + glm::length(rb.a)) {
 				rb.v = glm::vec3(0.0f);
 				rb.a = glm::vec3(0.0f);
 			}
 			else {
-				rb.a = -glm::normalize(rb.v) * coeff;
+				//空气阻力计算
+				float f2 = 1.0f / 2.0f * C * p * A * glm::length(rb.v) * glm::length(rb.v);
+
+				rb.a = -glm::normalize(rb.v) * (f1 + f2) / rb.getM();
 				rb.v += rb.a * RenderState::deltaTime;
 			}
+
+			//简化: 角速度固定衰减
+			if (rb.w > 0.01f) {
+				rb.w -= 0.01f * RenderState::deltaTime;
+			}
+			else if (rb.w < -0.01f) {
+				rb.w += 0.01f * RenderState::deltaTime;
+			}
+			else {
+				rb.w = 0.0f;
+			}
 		}
-		
+
 	}
 	else {
 		if (!reset) {
@@ -389,23 +443,24 @@ void Draw::drawAllModel() {
 
 			//再次初始化白球
 			oWhiteBall.position = glm::vec3(-4.3f, TABLE_PLANE, -5.0f);
+			oWhiteBall.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 			whiteBall.v = glm::vec3(0.0f);
 			whiteBall.a = glm::vec3(0.0f);
 			whiteBall.position = oWhiteBall.position;
-			
+			whiteBall.w = 0.0f;
+
 			//再次初始化红球
 			int count = 0;
 			for (int i = 1; i <= 5; i++) {
 				for (int j = 1; j <= i; j++) {
 					Object* obj = redBall_object_list[count];
 					++count;
-					obj->scale = glm::vec3(0.6f);
-					obj->init = true;
 					obj->position = glm::vec3(3.3f, TABLE_PLANE, -5.0f);
-					obj->position += glm::vec3(0.5f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+					obj->position += glm::vec3(0.3f * (i - 1) * std::sqrt(3) / 2, 0.0f, 0.0f);
+					obj->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 					if (i % 2 == 0) {
 						int offset = (j - 1) / 2;
-						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (0.5f + offset));
+						glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.3f * (0.5f + offset));
 						if (j % 2 == 0) z_offset *= -1;
 						obj->position += z_offset;
 					}
@@ -413,7 +468,7 @@ void Draw::drawAllModel() {
 						if (j == 1) continue;
 						else {
 							int offset = (j - 2) / 2;
-							glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.5f * (1 + offset));
+							glm::vec3 z_offset = glm::vec3(0.0f, 0.0f, 0.3f * (1 + offset));
 							if ((j - 1) % 2 == 0) z_offset *= -1;
 							obj->position += z_offset;
 						}
@@ -424,17 +479,35 @@ void Draw::drawAllModel() {
 				redBalls[i].v = glm::vec3(0.0f);
 				redBalls[i].a = glm::vec3(0.0f);
 				redBalls[i].position = redBall_object_list[i]->position;
+				redBalls[i].w = 0.0f;
 			}
 		}
-
-	}
-	
-	drawModel(mWhiteBall, oWhiteBall);
-	for (auto m : redBall_object_list) {
-		drawModel(redBall, *m, shaderName_of_redBall);
 	}
 
-	instancingRock(oPlanet);
+	if (shader == nullptr) {
+		drawPlane();
+
+		drawModel(backpack, oBackpack);
+
+		drawModel(planet, oPlanet);
+		instancingRock(oPlanet);
+
+		drawModel(table, oTable);
+
+		drawModel(mWhiteBall, oWhiteBall);
+		for (int i = 0; i < redBalls.size(); i++) {
+			drawModel(redBall, *redBall_object_list[i], shaderName_of_redBall);
+		}
+	}
+	else {
+		drawPlane(shader);
+		drawModel(backpack, oBackpack, shader);
+		drawModel(table, oTable, shader);
+		drawModel(mWhiteBall, oWhiteBall, shader);
+		for (int i = 0; i < redBalls.size(); i++) {
+			drawModel(redBall, *redBall_object_list[i], shader);
+		}
+	}
 }
 void Draw::visualizeNormal(Model& model, Object& obj) {
 	Shader* shader = getShader(
@@ -448,7 +521,6 @@ void Draw::visualizeNormal(Model& model, Object& obj) {
 	model.Draw(*shader);
 }
 void Draw::drawPlane() {
-	static Object plane("plane");
 	if (!plane.init) {
 		plane.position.y = -5.0f;
 		plane.scale.x = 10.0f;
@@ -505,7 +577,59 @@ void Draw::drawPlane() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, planeDiffuseMap);
 	}
+
+	glActiveTexture(GL_TEXTURE1);
+	shader->setInt("shadowMap", shadowMap);
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
+
 	shader->setFloat("explosion", plane.explosion);
+
+	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
+	else glDisable(GL_DEPTH_TEST);
+
+	glBindVertexArray(planeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}
+void Draw::drawPlane(Shader* shader) {
+	if (!plane.init) {
+		plane.position.y = -5.0f;
+		plane.scale.x = 10.0f;
+		plane.scale.z = 10.0f;
+		plane.init = true;
+	}
+
+	shader->use();
+	glm::mat4 planeModel = glm::mat4(1.0f);
+	planeModel = glm::translate(planeModel, plane.position);
+	planeModel = glm::rotate(planeModel, plane.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	planeModel = glm::rotate(planeModel, plane.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	planeModel = glm::rotate(planeModel, plane.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	planeModel = glm::scale(planeModel, plane.scale);
+	plane.model = planeModel;
+	shader->setMat4("model", plane.model);
+
+	static unsigned int	planeVAO = 0, planeVBO = 0;
+	if (planeVAO == 0) {
+		float planeVertices[] = {
+			 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+			-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+			 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+			 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+		};
+		glGenVertexArrays(1, &planeVAO);
+		glGenBuffers(1, &planeVBO);
+		glBindVertexArray(planeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
 
 	if (RenderState::enableDepthTest) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
@@ -552,6 +676,7 @@ void Draw::drawQuad(unsigned int& fbo, unsigned int& textureColorbuffer) {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	}
 
+	//创建一个中介FBO, 用blit将渲染好的图像传给它的颜色缓冲. 最后将这个颜色缓冲作为纹理绘制出来.
 	static unsigned int msColorBuffer = 0;
 	static unsigned int intermediateFBO = 0;
 	if (RenderState::enableMSAA) {
@@ -717,6 +842,9 @@ void Draw::render() {
 	static Light PointLight("Point Light", POINT);
 	static Light SpotLight("Spot Light", SPOT);
 
+	//让方向光位置保持在半径为30的球面上
+	dirLight.position = (glm::vec3(0.0f) - dirLight.direction) * 30.0f;
+
 	//准备好screen framebuffer
 	static unsigned int framebuffer = 0;
 	if (framebuffer == 0) {
@@ -770,6 +898,8 @@ void Draw::render() {
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	shadowMap = getShadowMap();
+
 	if (RenderState::enablePostProcessing) RenderState::enableFramebuffer = true;
 	if (RenderState::enableFramebuffer) glBindFramebuffer(GL_FRAMEBUFFER, RenderState::enableMSAA ? msFramebuffer : framebuffer);
 	else glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -783,6 +913,60 @@ void Draw::render() {
 	if (RenderState::enableFramebuffer) drawQuad(
 		RenderState::enableMSAA ? msFramebuffer : framebuffer,
 		RenderState::enableMSAA ? msScreenColorBuffer : screenColorBuffer);
+}
+unsigned int Draw::getShadowMap() {
+	//方向光阴影
+	static unsigned int shadowMapFBO = 0;
+	static unsigned int shadowMap = 0;
+	if (shadowMapFBO == 0) {
+		glGenFramebuffers(1, &shadowMapFBO);
+
+		const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+		glGenTextures(1, &shadowMap);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	static glm::vec3 dirLightPos = Light::allLights[0]->position;
+	static glm::mat4 lightSpaceMatrix;
+	if (dirLightPos != Light::allLights[0]->position) {
+		dirLightPos = Light::allLights[0]->position;
+		glm::mat4 lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 0.1f, 50.0f);
+		glm::mat4 lightView = glm::lookAt(
+			Light::allLights[0]->position,
+			Light::allLights[0]->direction,
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		lightSpaceMatrix = lightProjection * lightView;
+	}
+
+	Shader* shadowMapShader = getShader("../shader/dirShadow/shadowMap.vs", "../shader/dirShadow/shadowMap.fs");
+
+	glViewport(0, 0, 1024, 1024);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	shadowMapShader->use();
+	shadowMapShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+	drawAllModel(shadowMapShader);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, RenderState::SCREEN_WIDTH, RenderState::SCREEN_HEIGHT);
+
+	return shadowMap;
 }
 void Draw::instancingRock(Object planet) {
 	static Model rock("../resources/model/rock/rock.obj");

@@ -24,10 +24,12 @@ void TennisTable::updateTennis(Tennis& tennis) {
 	if (collision) {
 		//与桌面边缘碰撞, 反弹.
 		glm::vec3 normal = normal_of_border(tennis);
-		glm::vec3 v0 = -glm::normalize(tennis.v);
-		glm::vec3 v1 = 2 * glm::dot(v0, normal) * normal - v0;
-		v1 *= glm::length(tennis.v);
-		tennis.v = v1;
+
+		//法向速度, 切向速度.
+		glm::vec3 vn = glm::dot(tennis.v, -normal) * (-normal);
+		glm::vec3 vt = tennis.v - vn;
+
+		tennis.v = -vn + vt;
 	}
 }
 

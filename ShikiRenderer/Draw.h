@@ -25,9 +25,11 @@ public:
 	static unsigned int		loadCubeMap(std::vector<std::string>& faces);
 	static void				drawModel(Model& model, Object& obj);
 	static void				drawModel(Model& model, Object& obj, std::string& shaderName);
-	static void				drawAllModel();
+	static void				drawModel(Model& model, Object& obj, Shader* shader);
+	static void				drawAllModel(Shader* shader = nullptr);
 	static void				visualizeNormal(Model& model, Object& obj);
 	static void				drawPlane();
+	static void				drawPlane(Shader* shader);
 	static void				setupShader(Shader& shader);
 	static void				drawQuad(unsigned int& fbo, unsigned int& textureColorbuffer);
 	static void				drawSkybox();
@@ -37,6 +39,7 @@ public:
 	static void				beforeRender();
 	static void				render();
 	static void				instancingRock(Object planet);
+	static unsigned int		getShadowMap();
 
 private:
 	static glm::mat4		getNormalMatrix(glm::mat4 mat);
